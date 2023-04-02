@@ -134,10 +134,7 @@ class ESIOSDataDownloader(DataDownloader):
         frequency = "hour"
         var_xml = self.add_xml_variable(ticker, description, category, frequency, self.start_date, self.end_date)
         root_xml.append(var_xml)
-        # shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
-        df = pd.read_csv(self.raw_filename(ticker))
-        df = df[[ticker]]
-        df.to_csv(self.clean_filename(ticker))
+        shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
 
         ticker = "GENERACIÓN_MEDIDA_TOTAL"
         description = "Medidas de la generación según el tipo de producción utilizado. El desglose de este indicador " \
@@ -147,9 +144,7 @@ class ESIOSDataDownloader(DataDownloader):
         frequency = "hour"
         var_xml = self.add_xml_variable(ticker, description, category, frequency, self.start_date, self.end_date)
         root_xml.append(var_xml)
-        df = pd.read_csv(self.raw_filename(ticker))
-        #grouped_df = df.groupby(df['DATE']).sum()
-        df.to_csv(self.clean_filename(ticker))
+        shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
 
         tickers = ["GENERACIÓN_MEDIDA_EÓLICA_TERRESTRE", "GENERACIÓN_MEDIDA_CICLO_COMBINADO",
                    "GENERACIÓN_MEDIDA_DERIVADOS_DEL_PETROLEO_Ó_CARBÓN", "GENERACIÓN_MEDIDA_GAS_NATURAL_COGENERACIÓN",
@@ -161,9 +156,7 @@ class ESIOSDataDownloader(DataDownloader):
         for ticker in tickers:
             var_xml = self.add_xml_variable(ticker, description, category, frequency, self.start_date, self.end_date)
             root_xml.append(var_xml)
-            df = pd.read_csv(self.raw_filename(ticker))
-            grouped_df = df.groupby(df['DATE']).sum()
-            grouped_df.to_csv(self.clean_filename(ticker), index=False)
+            shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
 
         ticker = "PRECIO_MERCADO_SPOT_DIARIO"
         description = "El Mercado Diario es un mercado mayorista en el que se establecen transacciones de energía " \
@@ -184,10 +177,7 @@ class ESIOSDataDownloader(DataDownloader):
         frequency = "day"
         var_xml = self.add_xml_variable(ticker, description, category, frequency, self.start_date, self.end_date)
         root_xml.append(var_xml)
-        # shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
-        df = pd.read_csv(self.raw_filename(ticker))
-        df = df[[ticker]]
-        df.to_csv(self.clean_filename(ticker))
+        shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
 
         xmlstr = minidom.parseString(etree.tostring(root_xml)).toprettyxml(indent="    ")
         xml_file.write(xmlstr)
@@ -206,13 +196,9 @@ if __name__ == '__main__':
     # 600 -> PRECIO MERCADO SPOT DIARIO
 
     indicators = [1293, 10043, 1159, 1156, 1165, 1164, 10035, 1153, 1161, 600]
-    # indicators = [10043]
     start_date = isoparse("2014-01-01T00:00+00:00")
-    #end_date = isoparse("2014-01-14T00:00+00:00")
     end_date = isoparse("2022-12-31T23:59+00:00")
     downloader = ESIOSDataDownloader(indicators, start_date, end_date)
 
-    # indicators = [1293]
-
-    downloader.download()
-    # downloader.etl()
+    # downloader.download()
+    downloader.etl()

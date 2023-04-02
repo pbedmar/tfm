@@ -257,7 +257,6 @@ class ESIOS(object):
             
             # del df.index.name  # to avoid the index name bullshit
 
-            print(df)
             return df
         else:
             return None
