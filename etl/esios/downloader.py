@@ -94,7 +94,7 @@ class ESIOSDataDownloader(DataDownloader):
             os.makedirs(os.path.dirname(self.raw_directory()), exist_ok=True)
             df.to_csv(self.raw_directory() + clean_name + ".csv", index=False)
 
-    def add_xml_variable(self, ticker, description, category, frequency, since, until):
+    def add_xml_variable(self, ticker, description, category, frequency, region, since, until):
         var_xml = etree.Element("variable")
 
         ticker_xml = etree.SubElement(var_xml, "ticker")
@@ -110,7 +110,7 @@ class ESIOSDataDownloader(DataDownloader):
         frequency_xml.text = frequency
 
         region_xml = etree.SubElement(var_xml, "region")
-        region_xml.text = "península"
+        region_xml.text = region
 
         since_xml = etree.SubElement(var_xml, "since")
         since_xml.text = since.astimezone().isoformat()
@@ -132,7 +132,8 @@ class ESIOSDataDownloader(DataDownloader):
         description = "Es el valor real de la demanda de energía eléctrica medida en tiempo real."
         category = "energy / demand / real"
         frequency = "grouped (mean) by day"
-        var_xml = self.add_xml_variable(ticker, description, category, frequency, self.start_date, self.end_date)
+        region = "peninsula"
+        var_xml = self.add_xml_variable(ticker, description, category, frequency, region, self.start_date, self.end_date)
         root_xml.append(var_xml)
         shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
         df = pd.read_csv(self.raw_filename(ticker), index_col="DATE")
@@ -146,7 +147,8 @@ class ESIOSDataDownloader(DataDownloader):
                       "y la generación en el enlace de Baleares. Este indicador se puede desglosar por provincias."
         category = "energy / generation / measured"
         frequency = "grouped (sum) by day"
-        var_xml = self.add_xml_variable(ticker, description, category, frequency, self.start_date, self.end_date)
+        region = "peninsula"
+        var_xml = self.add_xml_variable(ticker, description, category, frequency, region, self.start_date, self.end_date)
         root_xml.append(var_xml)
         df = pd.read_csv(self.raw_filename(ticker))
         df = df.groupby(df['DATE']).sum()  # doesn't contain data about Balears and Canary Islands
@@ -162,7 +164,8 @@ class ESIOSDataDownloader(DataDownloader):
         category = "energy / generation / measured"
         frequency = "grouped (sum) by day"
         for ticker in tickers:
-            var_xml = self.add_xml_variable(ticker, description, category, frequency, self.start_date, self.end_date)
+            region = "peninsula"
+            var_xml = self.add_xml_variable(ticker, description, category, frequency, region, self.start_date, self.end_date)
             root_xml.append(var_xml)
             df = pd.read_csv(self.raw_filename(ticker))
             df.index = pd.to_datetime(df.index)
@@ -188,7 +191,8 @@ class ESIOSDataDownloader(DataDownloader):
                       "€/GBP) en la web de NordPool."
         category = "energy / price / spot"
         frequency = "day"
-        var_xml = self.add_xml_variable(ticker, description, category, frequency, self.start_date, self.end_date)
+        region = "spain"
+        var_xml = self.add_xml_variable(ticker, description, category, frequency, region, self.start_date, self.end_date)
         root_xml.append(var_xml)
         df = pd.read_csv(self.raw_filename(ticker), index_col="DATE")
         df = df.loc[df['geo_name'] == "España"]
