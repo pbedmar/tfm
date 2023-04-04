@@ -28,15 +28,14 @@ class Metadata:
     def get_tickers(self):
         return list(self.metadata["ticker"])
 
-    def get_metadata(self):
-        return self.metadata
-
-    def get_metadata_ticker(self, ticker):
-        return self.metadata.loc[self.metadata['ticker'] == ticker]
+    def get_metadata(self, ticker=None):
+        if ticker is None:
+            return self.metadata
+        else:
+            return self.metadata.loc[self.metadata['ticker'] == ticker]
 
 
 if __name__ == '__main__':
     md = Metadata("datalake/clean/esios")
     print(md.get_tickers())
     print(md.get_metadata())
-    print(md.get_metadata_ticker("DEMANDA_REAL"))
