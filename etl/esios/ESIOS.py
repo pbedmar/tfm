@@ -196,8 +196,7 @@ class ESIOS(object):
         # This is how the URL is built
 
         #  https://www.esios.ree.es/es/analisis/1293?vis=2&start_date=21-06-2016T00%3A00&end_date=21-06-2016T23%3A50&compare_start_date=20-06-2016T00%3A00&groupby=minutes10&compare_indicators=545,544#JSON
-        url = 'https://api.esios.ree.es/indicators/' + indicator + '?start_date=' + start_str + '&end_date=' + end_str \
-              + "&time_trunc=hour" + "&geo_agg=sum"
+        url = 'https://api.esios.ree.es/indicators/' + indicator + '?start_date=' + start_str + '&end_date=' + end_str
 
 
         # Perform the call

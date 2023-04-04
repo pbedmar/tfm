@@ -68,10 +68,10 @@ class ESIOSDataDownloader(DataDownloader):
             print("Indicator:", name)
             while start_date_local < self.end_date:
                 end_date_local = start_date_local + relativedelta(days=15) + relativedelta(minutes=-1)
-                print("Downloading from", start_date_local, "to", end_date_local)
-
                 if end_date_local > self.end_date:
                     end_date_local = self.end_date
+
+                print("Downloading from", start_date_local, "to", end_date_local)
 
                 result = None
                 while result is None:
@@ -83,7 +83,7 @@ class ESIOSDataDownloader(DataDownloader):
                     if result is None:
                         print("No data available")
 
-                partial_dfs.append(result[["value"]])
+                partial_dfs.append(result[["value", "geo_name"]])
                 start_date_local = start_date_local + relativedelta(days=15)
 
             clean_name = name.replace(" ", "_").upper()
@@ -94,7 +94,7 @@ class ESIOSDataDownloader(DataDownloader):
             os.makedirs(os.path.dirname(self.raw_directory()), exist_ok=True)
             df.to_csv(self.raw_directory() + clean_name + ".csv", index=False)
 
-    def add_xml_variable(self, ticker, description, category, frequency, since, until):
+    def add_xml_variable(self, ticker, description, category, frequency, region, since, until):
         var_xml = etree.Element("variable")
 
         ticker_xml = etree.SubElement(var_xml, "ticker")
@@ -110,7 +110,7 @@ class ESIOSDataDownloader(DataDownloader):
         frequency_xml.text = frequency
 
         region_xml = etree.SubElement(var_xml, "region")
-        region_xml.text = "península"
+        region_xml.text = region
 
         since_xml = etree.SubElement(var_xml, "since")
         since_xml.text = since.astimezone().isoformat()
@@ -131,10 +131,15 @@ class ESIOSDataDownloader(DataDownloader):
         ticker = "DEMANDA_REAL"
         description = "Es el valor real de la demanda de energía eléctrica medida en tiempo real."
         category = "energy / demand / real"
-        frequency = "hour"
-        var_xml = self.add_xml_variable(ticker, description, category, frequency, self.start_date, self.end_date)
+        frequency = "every 10 minutes - grouped (mean) by hour"
+        region = "peninsula"
+        var_xml = self.add_xml_variable(ticker, description, category, frequency, region, self.start_date, self.end_date)
         root_xml.append(var_xml)
         shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
+        df = pd.read_csv(self.raw_filename(ticker), index_col="DATE")
+        df.index = pd.to_datetime(df.index)
+        df = df[[ticker]].resample("H").mean()
+        df.to_csv(self.clean_filename(ticker))
 
         ticker = "GENERACIÓN_MEDIDA_TOTAL"
         description = "Medidas de la generación según el tipo de producción utilizado. El desglose de este indicador " \
@@ -142,21 +147,30 @@ class ESIOSDataDownloader(DataDownloader):
                       "y la generación en el enlace de Baleares. Este indicador se puede desglosar por provincias."
         category = "energy / generation / measured"
         frequency = "hour"
-        var_xml = self.add_xml_variable(ticker, description, category, frequency, self.start_date, self.end_date)
+        region = "peninsula"
+        var_xml = self.add_xml_variable(ticker, description, category, frequency, region, self.start_date, self.end_date)
         root_xml.append(var_xml)
-        shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
+        df = pd.read_csv(self.raw_filename(ticker))
+        df = df.groupby(df['DATE']).sum()  # doesn't contain data about Balears and Canary Islands
+        df.index = pd.to_datetime(df.index)
+        df.to_csv(self.clean_filename(ticker))
 
         tickers = ["GENERACIÓN_MEDIDA_EÓLICA_TERRESTRE", "GENERACIÓN_MEDIDA_CICLO_COMBINADO",
-                   "GENERACIÓN_MEDIDA_DERIVADOS_DEL_PETROLEO_Ó_CARBÓN", "GENERACIÓN_MEDIDA_GAS_NATURAL_COGENERACIÓN",
+                   "GENERACIÓN_MEDIDA_DERIVADOS_DEL_PETRÓLEO_Ó_CARBÓN", "GENERACIÓN_MEDIDA_GAS_NATURAL_COGENERACIÓN",
                    "GENERACIÓN_MEDIDA_HIDRÁULICA", "GENERACIÓN_MEDIDA_NUCLEAR",
-                   "GENERACIÓN_MEDIDA_SOLAR_FOTOVOLTAICA", ]
+                   "GENERACIÓN_MEDIDA_SOLAR_FOTOVOLTAICA"]
         description = " "
         category = "energy / generation / measured"
         frequency = "hour"
         for ticker in tickers:
-            var_xml = self.add_xml_variable(ticker, description, category, frequency, self.start_date, self.end_date)
+            region = "peninsula"
+            var_xml = self.add_xml_variable(ticker, description, category, frequency, region, self.start_date, self.end_date)
             root_xml.append(var_xml)
-            shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
+            df = pd.read_csv(self.raw_filename(ticker))
+            df.index = pd.to_datetime(df.index)
+            df = df.groupby(df['DATE']).sum()  # doesn't contain data about Balears and Canary Islands
+            df.index = pd.to_datetime(df.index)
+            df.to_csv(self.clean_filename(ticker))
 
         ticker = "PRECIO_MERCADO_SPOT_DIARIO"
         description = "El Mercado Diario es un mercado mayorista en el que se establecen transacciones de energía " \
@@ -173,11 +187,15 @@ class ESIOSDataDownloader(DataDownloader):
                       "por N2EX en el Reino Unido (externo al acoplamiento de los mercados diarios europeos), " \
                       "calculado en €/MWh con la información disponible (precio en GBP/MWh y ratio de conversión " \
                       "€/GBP) en la web de NordPool."
-        category = "energy / price / final"
-        frequency = "day"
-        var_xml = self.add_xml_variable(ticker, description, category, frequency, self.start_date, self.end_date)
+        category = "energy / price / spot"
+        frequency = "hour"
+        region = "spain"
+        var_xml = self.add_xml_variable(ticker, description, category, frequency, region, self.start_date, self.end_date)
         root_xml.append(var_xml)
-        shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
+        df = pd.read_csv(self.raw_filename(ticker), index_col="DATE")
+        df = df.loc[df['geo_name'] == "España"]
+        df = df[[ticker]]
+        df.to_csv(self.clean_filename(ticker))
 
         xmlstr = minidom.parseString(etree.tostring(root_xml)).toprettyxml(indent="    ")
         xml_file.write(xmlstr)
@@ -198,7 +216,8 @@ if __name__ == '__main__':
     indicators = [1293, 10043, 1159, 1156, 1165, 1164, 10035, 1153, 1161, 600]
     start_date = isoparse("2014-01-01T00:00+00:00")
     end_date = isoparse("2022-12-31T23:59+00:00")
+
     downloader = ESIOSDataDownloader(indicators, start_date, end_date)
 
-    # downloader.download()
+    downloader.download()
     downloader.etl()
