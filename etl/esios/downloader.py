@@ -1,9 +1,12 @@
 import os
+
 from dateutil.parser import isoparse
 from dateutil.relativedelta import relativedelta
+from datetime import timedelta
 from urllib.error import HTTPError
 
 import pandas as pd
+import numpy as np
 import shutil
 from xml.dom import minidom
 import xml.etree.ElementTree as etree
@@ -127,6 +130,7 @@ class ESIOSDataDownloader(DataDownloader):
         os.makedirs(os.path.dirname(self.clean_directory()), exist_ok=True)
         xml_file = open(self.metadata_filename(), "w", encoding="utf8")
         root_xml = etree.Element("variables")
+        date_range = pd.date_range(self.start_date, self.end_date, freq="H")
 
         ticker = "DEMANDA_REAL"
         description = "Es el valor real de la demanda de energía eléctrica medida en tiempo real."
@@ -138,6 +142,7 @@ class ESIOSDataDownloader(DataDownloader):
         shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
         df = pd.read_csv(self.raw_filename(ticker), index_col="DATE")
         df.index = pd.to_datetime(df.index)
+        df.interpolate(inplace=True)  # Deal with NaN values
         df = df[[ticker]].resample("H").mean()
         df.to_csv(self.clean_filename(ticker))
 
@@ -153,6 +158,9 @@ class ESIOSDataDownloader(DataDownloader):
         df = pd.read_csv(self.raw_filename(ticker))
         df = df.groupby(df['DATE']).sum()  # doesn't contain data about Balears and Canary Islands
         df.index = pd.to_datetime(df.index)
+        df = df.reindex(date_range)  # Deal with missing dates
+        df.index = df.index.rename("DATE")
+        df.interpolate(inplace=True)  # Deal with NaN values
         df.to_csv(self.clean_filename(ticker))
 
         tickers = ["GENERACIÓN_MEDIDA_EÓLICA_TERRESTRE", "GENERACIÓN_MEDIDA_CICLO_COMBINADO",
@@ -170,6 +178,9 @@ class ESIOSDataDownloader(DataDownloader):
             df.index = pd.to_datetime(df.index)
             df = df.groupby(df['DATE']).sum()  # doesn't contain data about Balears and Canary Islands
             df.index = pd.to_datetime(df.index)
+            df = df.reindex(date_range)  # Deal with missing dates
+            df.index = df.index.rename("DATE")
+            df.interpolate(inplace=True)  # Deal with NaN values
             df.to_csv(self.clean_filename(ticker))
 
         ticker = "PRECIO_MERCADO_SPOT_DIARIO"
@@ -195,6 +206,15 @@ class ESIOSDataDownloader(DataDownloader):
         df = pd.read_csv(self.raw_filename(ticker), index_col="DATE")
         df = df.loc[df['geo_name'] == "España"]
         df = df[[ticker]]
+        df.index = pd.to_datetime(df.index)
+
+        duplicated_index = df.index[df.index.duplicated(keep="first")]  # deal with duplicate dates
+        new_index = duplicated_index + timedelta(hours=1)
+        updated_index = df.index.copy()
+        idx = np.where(df.index.duplicated(keep="first") == True)
+        updated_index.values[idx] = new_index
+        df.index = updated_index
+
         df.to_csv(self.clean_filename(ticker))
 
         xmlstr = minidom.parseString(etree.tostring(root_xml)).toprettyxml(indent="    ")
@@ -219,5 +239,5 @@ if __name__ == '__main__':
 
     downloader = ESIOSDataDownloader(indicators, start_date, end_date)
 
-    downloader.download()
+    # downloader.download()
     downloader.etl()
