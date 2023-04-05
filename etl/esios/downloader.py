@@ -215,7 +215,7 @@ if __name__ == '__main__':
 
     indicators = [1293, 10043, 1159, 1156, 1165, 1164, 10035, 1153, 1161, 600]
     start_date = isoparse("2014-01-01T00:00+00:00")
-    end_date = isoparse("2022-12-31T23:59+00:00")
+    end_date = isoparse("2023-02-28T23:59+00:00")
 
     downloader = ESIOSDataDownloader(indicators, start_date, end_date)
 
