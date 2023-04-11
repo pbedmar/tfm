@@ -52,8 +52,8 @@ if __name__ == '__main__':
     print(omie.get_tickers())
     print(omie.get_series("PRECIO_OMIE"))
 
-    start_index = isoparse("2020-12-01 00:00:00+00:00")
-    end_index = isoparse("2021-12-31 00:00:00+00:00")
+    start_index = isoparse("2022-12-01 00:00:00+01:00")
+    end_index = isoparse("2022-12-31 00:00:00+00:00")
     print(omie.get_series("PRECIO_OMIE", start_index=start_index))
     print(omie.get_series("PRECIO_OMIE", start_index=start_index, end_index=end_index))
 
