@@ -48,8 +48,8 @@ class OMIEDataDownloader(DataDownloader):
 
     def etl(self):
         os.makedirs(os.path.dirname(self.clean_directory()), exist_ok=True)
-        xml_file = open(self.metadata_filename(), "w", encoding="utf8")
-        root_xml = etree.Element("variables")
+        # xml_file = open(self.metadata_filename(), "w", encoding="utf8")
+        # root_xml = etree.Element("variables")
         date_range = pd.date_range(self.start_date, self.end_date, freq="H")
 
         ticker = "PRECIO_OMIE"
@@ -79,10 +79,11 @@ class OMIEDataDownloader(DataDownloader):
 
         # arrange hours in an horizontal fashion
         df = pd.melt(df, id_vars=['DATE'], var_name='hour', value_name='value')
-        df['DATE'] = df['DATE'].dt.strftime('%Y-%m-%d') + ' ' + df['hour'] + ':00:00'
+        df['DATE'] = df['DATE'].dt.strftime('%Y-%m-%d') + ' ' + df['hour'] + ':00+01:00'
         df = df.set_index(pd.to_datetime(df['DATE']))
         df = df.drop(['hour', 'DATE'], axis=1)
         df = df.sort_index()
+        df.rename(columns={'value': ticker}, inplace=True)
 
         print("\nLongitud del dataset:", len(df))
         print("Número de fechas que deben existir en ese rango", len(date_range))
