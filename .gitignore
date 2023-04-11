@@ -180,4 +180,10 @@ dmypy.json
 /cache/
 datalake/
 /datalake/raw/
+/report/
+!/report/*.tex
+!/report/citations
+!/report/chapters/*.tex
+!/report/images
+
 
