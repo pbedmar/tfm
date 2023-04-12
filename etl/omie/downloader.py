@@ -1,24 +1,16 @@
 import os
 
 from dateutil.parser import isoparse
-from dateutil.relativedelta import relativedelta
-from datetime import timedelta
-from urllib.error import HTTPError
-
 import pandas as pd
-import numpy as np
-import shutil
-from xml.dom import minidom
-import xml.etree.ElementTree as etree
 
 from etl.downloader import DataDownloader
 
 
 class OMIEDataDownloader(DataDownloader):
     """
-    ESIOSDataDownloader class
+    OMIEDataDownloader class
 
-    DataDownloader implementation for ESIOS.
+    DataDownloader implementation for OMIE.
     """
 
     def __init__(self, path="datalake/"):
@@ -55,7 +47,7 @@ class OMIEDataDownloader(DataDownloader):
         ticker = "PRECIO_OMIE"
         description = "Precios de la electricidad obtenidos desde OMIE."
         category = "energy / price"
-        frequency = "hourly data"
+        frequency = "hourly"
         region = "Spain"
         years = range(self.start_date.year, self.end_date.year+1)
 
@@ -77,7 +69,7 @@ class OMIEDataDownloader(DataDownloader):
         print("\nNúmero de valores nulos en el dataset tras la limpieza:\n", df.isna().sum())
         print(df["DATE"].dtypes)
 
-        # arrange hours in an horizontal fashion
+        # arrange hours in a horizontal fashion
         df = pd.melt(df, id_vars=['DATE'], var_name='hour', value_name='value')
         df['DATE'] = df['DATE'].dt.strftime('%Y-%m-%d') + ' ' + df['hour'] + ':00+01:00'
         df = df.set_index(pd.to_datetime(df['DATE']))
@@ -86,7 +78,7 @@ class OMIEDataDownloader(DataDownloader):
         df.rename(columns={'value': ticker}, inplace=True)
 
         print("\nLongitud del dataset:", len(df))
-        print("Número de fechas que deben existir en ese rango", len(date_range))
+        print("Número de fechas que deben existir en ese rango:", len(date_range))
 
         df.to_csv(self.clean_filename(ticker))
 
