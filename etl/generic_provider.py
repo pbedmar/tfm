@@ -58,3 +58,5 @@ if __name__ == '__main__':
     print(omie.get_series("PRECIO_OMIE", start_index=start_index, end_index=end_index))
 
     print(omie.get_series("PRECIO_OMIE", resample_by="W", group_mode="mean"))
+
+    investingdotcom = GenericDataProvider("datalake/clean/investingdotcom/", want_metadata=False, tickers=["PRECIO_OMIE"])
