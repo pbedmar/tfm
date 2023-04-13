@@ -63,6 +63,8 @@ class InvestingDotComDataDownloader(DataDownloader):
         print("Número de fechas que deben existir en ese rango:", len(date_range))
         print("Número de valores nulos en el dataset:\n", df.isna().sum())
 
+        df.index.names = ["DATE"]
+        df.columns = [ticker]
         df.to_csv(self.clean_filename(ticker))
 
         # MENSUAL TTF PRICE
@@ -84,6 +86,8 @@ class InvestingDotComDataDownloader(DataDownloader):
         print("Número de fechas que deben existir en ese rango:", len(date_range))
         print("Número de valores nulos en el dataset:\n", df.isna().sum())
 
+        df.index.names = ["DATE"]
+        df.columns = [ticker]
         df.to_csv(self.clean_filename(ticker))
 
 
