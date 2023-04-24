@@ -93,7 +93,7 @@ if __name__ == '__main__':
     ree_categorias_widgets = {"balance": ["balance-electrico"]}
     downloader = REEDataDownloader(ree_categorias_widgets)
 
-    start_date_ = parse("2018-01-01T00:00+00:00")
-    end_date_ = parse("2018-07-31T23:59+00:00")
-    #downloader.download(start_date_, end_date_)
+    start_date_ = parse("2018-01-01T00:00")
+    end_date_ = parse("2018-07-31T23:59")
+    # downloader.download(start_date_, end_date_)
     downloader.etl()

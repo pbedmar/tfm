@@ -41,9 +41,11 @@ if __name__ == '__main__':
     print(prov.get_metadata("DEMANDA_REAL"))
     print(prov.get_series("DEMANDA_REAL"))
 
-    start_index = isoparse("2020-12-01 00:00:00+00:00")
-    end_index = isoparse("2021-12-31 00:00:00+00:00")
+    start_index = isoparse("2022-12-01 00:00:00+01:00")
+    end_index = isoparse("2022-12-31 00:00:00+01:00")
     print(prov.get_series("DEMANDA_REAL", start_index=start_index))
     print(prov.get_series("DEMANDA_REAL", start_index=start_index, end_index=end_index))
 
     print(prov.get_series("DEMANDA_REAL", resample_by="W", group_mode="mean"))
+
+    print(prov.get_series("PRECIO_MERCADO_SPOT_DIARIO", start_index=start_index, end_index=end_index))
