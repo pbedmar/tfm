@@ -31,7 +31,11 @@ class GenericDataProvider(DataProvider):
 
     def get_series(self, ticker, start_index=None, end_index=None, resample_by=None, group_mode=None):
         ts = pd.read_csv(self.path+ticker+".csv", index_col="DATE").squeeze()
-        ts.index = pd.to_datetime(ts.index).to_pydatetime()
+        ts.index = pd.PeriodIndex(ts.index, freq="M")
+        ts = ts.sort_index()
+        # ts.index = pd.to_datetime(ts.index).to_pydatetime()
+        # ts = ts.asfreq("MS")
+        # ts.index = ts.index.to_period("M")
 
         if start_index is not None:
             ts = ts.loc[ts.index >= start_index]
@@ -48,15 +52,16 @@ class GenericDataProvider(DataProvider):
 
 
 if __name__ == '__main__':
-    omie = GenericDataProvider("datalake/clean/omie/", want_metadata=False, tickers=["PRECIO_OMIE"])
-    print(omie.get_tickers())
-    print(omie.get_series("PRECIO_OMIE"))
+    # omie = GenericDataProvider("datalake/clean/omie/", want_metadata=False, tickers=["PRECIO_OMIE"])
+    # print(omie.get_tickers())
+    # print(omie.get_series("PRECIO_OMIE"))
+    #
+    # start_index = isoparse("2022-12-01 00:00:00+01:00")
+    # end_index = isoparse("2022-12-31 00:00:00+00:00")
+    # print(omie.get_series("PRECIO_OMIE", start_index=start_index))
+    # print(omie.get_series("PRECIO_OMIE", start_index=start_index, end_index=end_index))
+    #
+    # print(omie.get_series("PRECIO_OMIE", resample_by="W", group_mode="mean"))
 
-    start_index = isoparse("2022-12-01 00:00:00+01:00")
-    end_index = isoparse("2022-12-31 00:00:00+00:00")
-    print(omie.get_series("PRECIO_OMIE", start_index=start_index))
-    print(omie.get_series("PRECIO_OMIE", start_index=start_index, end_index=end_index))
-
-    print(omie.get_series("PRECIO_OMIE", resample_by="W", group_mode="mean"))
-
-    investingdotcom = GenericDataProvider("datalake/clean/investingdotcom/", want_metadata=False, tickers=["PRECIO_OMIE"])
+    investingdotcom = GenericDataProvider("datalake/clean/investingdotcom/", want_metadata=False, tickers=["MONTHLY_TTF_PRICE"])
+    print(investingdotcom.get_series("MONTHLY_TTF_PRICE"))
