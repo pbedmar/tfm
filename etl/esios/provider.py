@@ -17,9 +17,12 @@ class ESIOSDataProvider(DataProvider):
     def get_metadata(self, ticker=None):
         return self.metadata.get_metadata(ticker)
 
-    def get_series(self, ticker, start_index=None, end_index=None, resample_by=None, group_mode=None):
+    def get_series(self, ticker, freq=None, start_index=None, end_index=None, resample_by=None, group_mode=None):
         ts = pd.read_csv(self.path+ticker+".csv", index_col="DATE").squeeze()
-        ts.index = pd.to_datetime(ts.index)
+        #ts.index = pd.to_datetime(ts.index)
+        if freq is not None:
+            ts.index = pd.PeriodIndex(ts.index, freq=freq)
+        ts = ts.sort_index()
 
         if start_index is not None:
             ts = ts.loc[ts.index >= start_index]
