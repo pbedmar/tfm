@@ -232,6 +232,11 @@ if __name__ == '__main__':
     # 1153 -> Generación medida Nuclear
     # 1161 -> Generación medida Solar fotovoltaica
     # 600 -> PRECIO MERCADO SPOT DIARIO
+    # 541 -> Previsión de la producción eólica nacional peninsular
+    # 544 -> Demanda prevista
+    # 10034 -> Generación prevista solar
+    # 542 -> Generación prevista solar fotovoltaica
+    # 543 -> Generación prevista Solar termica
 
     indicators = [1293, 10043, 1159, 1156, 1165, 1164, 10035, 1153, 1161, 600]
     start_date = isoparse("2014-01-01T00:00+00:00")
