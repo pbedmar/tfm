@@ -42,7 +42,7 @@ class ICAPDataDownloader(DataDownloader):
         # xml_file = open(self.metadata_filename(), "w", encoding="utf8")
         # root_xml = etree.Element("variables")
 
-        # DAILY TTF PRICE
+        # C02 EUA PRICE
         start_date = isoparse("2005-03-09")
         end_date = isoparse("2023-03-31")
         date_range = pd.date_range(start_date, end_date, freq="D")

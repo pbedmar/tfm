@@ -163,10 +163,9 @@ class ESIOSDataDownloader(DataDownloader):
         df.interpolate(inplace=True)  # Deal with NaN values
         df.to_csv(self.clean_filename(ticker))
 
-        tickers = ["GENERACIÓN_MEDIDA_EÓLICA_TERRESTRE", "GENERACIÓN_MEDIDA_CICLO_COMBINADO",
-                   "GENERACIÓN_MEDIDA_DERIVADOS_DEL_PETRÓLEO_Ó_CARBÓN", "GENERACIÓN_MEDIDA_GAS_NATURAL_COGENERACIÓN",
-                   "GENERACIÓN_MEDIDA_HIDRÁULICA", "GENERACIÓN_MEDIDA_NUCLEAR",
-                   "GENERACIÓN_MEDIDA_SOLAR_FOTOVOLTAICA"]
+        tickers = ["GENERACIÓN_MEDIDA_EÓLICA", "GENERACIÓN_MEDIDA_HIDRÁULICA",
+                   "GENERACIÓN_MEDIDA_NUCLEAR", "GENERACIÓN_MEDIDA_SOLAR",
+                   "GENERACIÓN_MEDIDA_CICLO_COMBINADO", "GENERACIÓN_MEDIDA_CARBÓN"]
         description = " "
         category = "energy / generation / measured"
         frequency = "hour"
@@ -238,7 +237,20 @@ if __name__ == '__main__':
     # 542 -> Generación prevista solar fotovoltaica
     # 543 -> Generación prevista Solar termica
 
-    indicators = [1293, 10043, 1159, 1156, 1165, 1164, 10035, 1153, 1161, 600]
+    # Final ones:
+    # Demanda real  1293
+    # Generación medida total   10043
+    # Generación medida Eólica	10037
+    # Generación medida Hidráulica  10035
+    # Generación medida Nuclear	1153
+    # Generación medida solar	10205
+    # Generación medida Ciclo combinado	1156
+    # Generación medida Carbón	10036
+    # Precio mercado SPOT diario    600
+
+
+    # indicators = [1293, 10043, 1159, 1156, 1165, 1164, 10035, 1153, 1161, 600]
+    indicators = [1293, 10043, 10037, 10035, 1153, 10205, 1156, 10036, 600]
     start_date = isoparse("2014-01-01T00:00+00:00")
     end_date = isoparse("2023-03-31T23:59+00:00")
 
