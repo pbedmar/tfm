@@ -1,4 +1,10 @@
 import pandas as pd
+import numpy as np
+
+from sklearn.ensemble import IsolationForest, RandomForestRegressor, GradientBoostingRegressor
+from sklearn.svm import SVR
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.model_selection import GridSearchCV, TimeSeriesSplit, ShuffleSplit
 
 from sktime.utils.plotting import plot_series
 from sktime.performance_metrics.forecasting import mean_absolute_percentage_error
@@ -8,6 +14,33 @@ from sktime.forecasting.model_selection import SlidingWindowSplitter
 from sktime.forecasting.arima import AutoARIMA
 from sktime.forecasting.compose import make_reduction
 
+SEED = 0
+
+##########################################################################
+#                          Outlier management                            #
+##########################################################################
+
+def remove_outliers_isolation_forests(data, contamination=0.05):
+    outlier_detector = IsolationForest(contamination=contamination)
+    for column in data:
+        outlier_detector.fit(data[[column]].values)
+        outlier_prediction = outlier_detector.predict(data[[column]].values)
+        data.loc[outlier_prediction == -1, column] = np.nan
+        data[[column]] = data[[column]].interpolate().fillna(method='ffill').fillna(method='bfill')
+
+    return data
+
+
+##########################################################################
+#                     Predictor importance analysis                      #
+##########################################################################
+
+
+
+
+##########################################################################
+#                             Price forecast                             #
+##########################################################################
 
 def crossval_window_size(y, X, forecaster, train_window_size_list, forecasting_horizon):
     cv_results_list = []
@@ -60,3 +93,23 @@ def relation_between_response_and_predictor(y, X, diff_lag):
     forecaster.fit(y=y_transform, X=x_transform)
 
     return forecaster.get_fitted_params()
+
+
+if __name__ == '__main__':
+    from etl.esios.provider import ESIOSDataProvider
+
+    esios_provider = ESIOSDataProvider()
+    esios_tickers = esios_provider.get_tickers()
+
+    esios_df = esios_provider.get_all_series(freq="H", start_index="2023-01-01 00:00", end_index="2023-03-31 23:59")
+
+    contamination = 0.05
+    #esios_df = remove_outliers_isolation_forests(esios_df, contamination)
+
+    esios_spot = esios_df["PRECIO_MERCADO_SPOT_DIARIO"]
+    esios_demand = esios_df["DEMANDA_REAL"]
+    X = esios_df.drop(['PRECIO_MERCADO_SPOT_DIARIO', 'GENERACIÓN_MEDIDA_TOTAL'], axis=1)
+
+    print(esios_spot.head(10))
+
+    #compute_ml_ts_data(esios_spot,X,1,1)

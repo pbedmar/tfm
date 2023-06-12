@@ -142,8 +142,8 @@ class ESIOSDataDownloader(DataDownloader):
         shutil.copy(self.raw_filename(ticker), self.clean_filename(ticker))
         df = pd.read_csv(self.raw_filename(ticker), index_col="DATE")
         df.index = pd.to_datetime(df.index)
-        df.interpolate(inplace=True)  # Deal with NaN values
         df = df[[ticker]].resample("H").mean()
+        df.interpolate(inplace=True)
         df.to_csv(self.clean_filename(ticker))
 
         ticker = "GENERACIÓN_MEDIDA_TOTAL"
