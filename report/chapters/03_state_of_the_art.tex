@@ -1,0 +1,60 @@
+\chapter{State of the art}
+\label{ch:state-of-the-art}
+Time series are a type of data that indicate how things change over time. They are different from other types because time is a fundamental dimension on them, being data order as important as the data per se. That's why analyzing and forecasting time series is more challenging and extra considerations should be taken into account. \cite{lazzeri2020machine}
+
+\section{Time series components}
+The three components that conform them are:
+\begin{itemize}
+    \item Trend component ($T_t$): Defined as the long term movement in a time series. It can be constant, increasing or decreasing in time.
+    \item Seasonal component ($S_t$): Periodic fluctuations in the series that normally happen in a period of less than a year. Weather seasons or social conventions are examples of what produces this seasonality.
+    \item Cyclic component ($C_t$): Recurrent fluctuations that appear in the series but don't have a fixed length. An example of this is a business cycle, whose duration is not known a priori.
+    \item Remainder component ($R_t$): Unpredictable variations that can not be explained by the other three.
+\end{itemize}
+
+They can be combined in an additive way ($y_t = S_t + C_t + T_t + R_t$), a multiplicative one ($y_t = S_t \times C_t \times T_t \times R_t$) or a combination of both ($y_t = S_t \times C_t + T_t + R_t$, $y_t = S_t + C_t + T_t \times R_t$\ldots). The additive decomposition is more adequate when the degree of variation in the components doesn't seem to change with the level of the time series. Otherwise, is more recommended to apply a multiplicative one.  \cite{hyndman2018forecasting,lazzeri2020machine}
+
+\subsubsection{Stationarity}
+A very important concept in time series is stationarity.
+A stationary time series is one whose properties does not change with time, with the moment in which the series is observed. If some trend or seasonality is present, it doesn't hold.
+
+Usually, an stationary time series will have no predictable patterns in the long term. Nevertheless, a cyclic behaviour with no trend nor seasonality is stationary.
+
+One way of detecting stationarity is by generating ACF plots, like the one in Figure \ref{fig:solar-acf}. They also are useful to detect cycles in the series.
+
+
+\section{Forecasting}
+In \cite{hyndman2018forecasting}, the author explains that "forecasting is about predicting the future as accurately as possible, given all the information available, including historical data and knowledge of any future events that might impact the forecasts".
+Selecting an adequate forecasting method will depend on the characteristics of the time series, using simpler or more advanced methods.
+
+\subsection{Simple methods}
+In some situations they can be really effective. Some of these methods are: \cite{hyndman2018forecasting}
+\begin{itemize}
+    \item \textbf{Average method:} Forecast with the mean of the historical data. A very popular variation of this technique is the Moving Average (MA) method, in which the mean is computed not over the complete historical series but over the K more recent points.
+    \item \textbf{Naïve method:} Forecast with the last observation of the historical data.
+    \item \textbf{Drift method:} A modification of the previous technique where forecasts increase or decrease over time.
+\end{itemize}
+
+\subsection{Classical methods}
+These methods were developed some decades ago and are based in statistics. They have been the de facto standard to forecast time series until the creation of more advanced methods. Some of them are: \cite{lazzeri2020machine, hyndman2018forecasting}
+\begin{itemize}
+    \item \textbf{Exponential smoothing (ETS):} Uses the MA method, assigning higher weights to more recent values and lower weights to those which are more distant in time. Combines Error, Trend and Seasonality components to model the series.
+    \item \textbf{Auto Regressive Integrated Moving Average (ARIMA):} Combines an autoregressive model, in which a linear model is trained using as predictors the lagged values of the variable, with a moving average and integration. In the moving average, instead of forecasting using lags of the actual variable, past forecasting errors are used as predictors. The integration step is in charge of making the time series stationary.
+\end{itemize}
+
+\subsection{Advanced methods}
+%\subsubsection{}
+TODO
+
+\section{Predictor's influence}
+%When forecasting (and predicting in general) it is important to build a model that adequately captures the underlying patterns of data. This will lead to accurate and strong predictions.
+%
+%But in many cases it is also important to understand how data is affecting the model. Which variables are more important in the prediction? How and why? This is an issue that model interpretability attempts to solve.
+TODO
+
+
+
+
+sktime \cite{DBLP:journals/corr/abs-1909-07872}
+pmdarima \cite{pmdarima}
+scikit-learn \cite{scikit-learn}
+SHAP package \cite{shap-package}
