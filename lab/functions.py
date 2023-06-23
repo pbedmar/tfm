@@ -10,7 +10,7 @@ from sktime.forecasting.model_selection import temporal_train_test_split
 from sklearn.model_selection import GridSearchCV, TimeSeriesSplit, ShuffleSplit
 
 from sktime.utils.plotting import plot_series
-from sktime.performance_metrics.forecasting import MeanAbsoluteScaledError, mean_absolute_error
+from sktime.performance_metrics.forecasting import MeanAbsoluteScaledError, mean_absolute_scaled_error, mean_absolute_error
 from sktime.transformations.series.difference import Differencer
 from sktime.forecasting.model_evaluation import evaluate
 from sktime.forecasting.model_selection import SlidingWindowSplitter
@@ -204,6 +204,8 @@ def predictors_influence_study(esios_spot, X, best_model, lags, date_features, f
     y_date_features, X_date_features, test_size=0.15)
 
     best_model.fit(X_date_features_train, y_date_features_train)
+    y_pred = best_model.predict(X_date_features_test)
+    print("Prediction MASE:", mean_absolute_scaled_error(y_date_features_test, y_pred))
     explainer = shap.Explainer(best_model.predict, X_date_features_test, seed=seed)
     shap_values = explainer(X_date_features_test)
 

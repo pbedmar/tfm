@@ -1,4 +1,5 @@
 \chapter{Research methodology and implementation}
+\label{ch:methodology}
 In this chapter the author is designing the methodology to be followed in the experiments. This is an important step, as building it correctly will lead to significant and meaningful results.
 We discuss three phases: data acquisition and preprocessing, price forecasting and predictor's importance.
 
@@ -9,6 +10,7 @@ In the last two phases the author explains the design of the experiments: the sa
 On the other hand, for the yearly level, as there is not enough data to perform an statistical study, a descriptive and visual analysis will be performed.
 
 \section{Data acquisition and preprocessing}
+TODO
 
 \section{ML models need tabular form}
 In statistical time series models as ARIMA, data can be directly introduced in the model without restructuring it.
@@ -35,7 +37,7 @@ We will test different models, analyzing which of them work better:
     \item Random Forest (RF)
     \item Gradient Boosted Trees (GBT)
     \item Support Vector Machine (SVM)
-    \item Dummy regressor, acting as baseline.
+    \item Dummy regressor (DR), acting as baseline.
 \end{itemize}
 All of them are implemented in \textit{scikit-learn} and integrated in \textit{sktime} by the use of \textit{make\_reduction()} function. On it, the parameter \text{strategy} needs to be specified: there are two possible strategies to forecast each value in the forecasting horizon, direct and recursive.
 
