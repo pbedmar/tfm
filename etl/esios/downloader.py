@@ -221,23 +221,6 @@ class ESIOSDataDownloader(DataDownloader):
 
 
 if __name__ == '__main__':
-    # 1293 -> demanda real
-    # 10043 -> generacion medida total
-    # 1159 -> Generación medida Eólica terrestre
-    # 1156 -> Generación medida ciclo combinado
-    # 1165 -> Generación medida Derivados del petróleo ó carbón
-    # 1164 -> Generación medida Gas Natural Cogeneración
-    # 10035 -> Generación medida Hidráulica
-    # 1153 -> Generación medida Nuclear
-    # 1161 -> Generación medida Solar fotovoltaica
-    # 600 -> PRECIO MERCADO SPOT DIARIO
-    # 541 -> Previsión de la producción eólica nacional peninsular
-    # 544 -> Demanda prevista
-    # 10034 -> Generación prevista solar
-    # 542 -> Generación prevista solar fotovoltaica
-    # 543 -> Generación prevista Solar termica
-
-    # Final ones:
     # Demanda real  1293
     # Generación medida total   10043
     # Generación medida Eólica	10037
@@ -248,8 +231,6 @@ if __name__ == '__main__':
     # Generación medida Carbón	10036
     # Precio mercado SPOT diario    600
 
-
-    # indicators = [1293, 10043, 1159, 1156, 1165, 1164, 10035, 1153, 1161, 600]
     indicators = [1293, 10043, 10037, 10035, 1153, 10205, 1156, 10036, 600]
     start_date = isoparse("2014-01-01T00:00+00:00")
     end_date = isoparse("2023-03-31T23:59+00:00")

@@ -122,33 +122,8 @@ def crossval_summary_sktime(cv_results_df):
         cv_results_df_summary = pd.concat([cv_results_df_summary, row_df], axis=0, ignore_index=True)
 
     cv_results_df_summary = cv_results_df_summary.sort_values(by="mase")
-    cv_results_df_summary
     return cv_results_df_summary
 
-
-def crossval_window_size(y, X, forecaster, train_window_size_list, forecasting_horizon):
-    cv_results_list = []
-
-    for train_window_size in train_window_size_list:
-        cv = SlidingWindowSplitter(window_length=train_window_size, fh=list(range(1,forecasting_horizon+1)), step_length=forecasting_horizon)
-        # refit strategy makes a new model on each iteration, not an update
-        cv_results = evaluate(forecaster, y=y, X=X, cv=cv, strategy="refit", return_data=True, error_score="raise")
-        cv_results_list.append(cv_results)
-
-    return cv_results_list
-
-
-def crossval_window_size_make_reduction(y, X, regressor, train_window_size_list, forecasting_horizon):
-    cv_results_list = []
-
-    for train_window_size in train_window_size_list:
-        cv = SlidingWindowSplitter(window_length=train_window_size, fh=list(range(1,forecasting_horizon+1)), step_length=forecasting_horizon)
-        # refit strategy makes a new model on each iteration, not an update
-        forecaster = make_reduction(regressor, strategy="direct", window_length=train_window_size, windows_identical=True)
-        cv_results = evaluate(forecaster, y=y, X=X, cv=cv, strategy="refit", return_data=True, error_score="raise")
-        cv_results_list.append(cv_results)
-
-    return cv_results_list
 
 def crossval_plot_series(y, cv_results_df):
     for model in cv_results_df["model"].unique():
@@ -162,6 +137,30 @@ def crossval_plot_series(y, cv_results_df):
         )
 
         ax.plot
+
+
+def crossval_arima_sktime(y, X, window_lengths, step_size, fh, save_path, save_name):
+
+    cv_results_list = []
+    for window_length in window_lengths:
+        cv = SlidingWindowSplitter(fh, window_length, step_size)
+
+        forecaster_str = f"AutoARIMA_{window_length}"
+        print(f"Training setup: regressor {forecaster_str}")
+
+        forecaster = AutoARIMA(maxiter=200, random_state=0)
+        cv_results = evaluate(forecaster, y=y, X=X, cv=cv, strategy="refit", error_score="raise", return_data=True, scoring=MeanAbsoluteScaledError())
+        cv_results_list.append(cv_results)
+
+    cv_results_df = pd.DataFrame(columns=list(cv_results_list[0].columns))
+    for result, window_length in zip(cv_results_list, window_lengths):
+        forecaster_str = f"AutoARIMA_{window_length}"
+        result["model"] = forecaster_str
+        cv_results_df = pd.concat([cv_results_df, result], axis=0, ignore_index=True)
+
+    os.makedirs(save_path, exist_ok=True)
+    cv_results_df.to_pickle(save_path + save_name)
+    return cv_results_df
 
 
 def relation_between_response_and_predictor(y, X, diff_lag):
@@ -205,7 +204,7 @@ def predictors_influence_study(esios_spot, X, best_model, lags, date_features, f
 
     best_model.fit(X_date_features_train, y_date_features_train)
     y_pred = best_model.predict(X_date_features_test)
-    print("Prediction MASE:", mean_absolute_scaled_error(y_date_features_test, y_pred))
+    print("Prediction MASE:", mean_absolute_scaled_error(y_date_features_test, y_pred, y_train=y_date_features_train))
     explainer = shap.Explainer(best_model.predict, X_date_features_test, seed=seed)
     shap_values = explainer(X_date_features_test)
 

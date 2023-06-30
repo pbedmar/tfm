@@ -12,8 +12,8 @@ On the other hand, for the yearly level, as there is not enough data to perform 
 \section{Data acquisition and preprocessing}
 TODO
 
-\section{ML models need tabular form}
-In statistical time series models as ARIMA, data can be directly introduced in the model without restructuring it.
+\subsection{ML models need tabular form}
+In classical time series models as ARIMA, data can be directly introduced in the model without restructuring it.
 But when we use ML-based architectures, data has to be reshaped so the models can recover autocorrelation.
 This is why the author arranges it in the tabular form described in Figure \ref{fig:ml-arrangement}.
 On it, the response (price) and predictors (as could be demand or generation) are included together with some response lags.
@@ -28,9 +28,9 @@ On it, the response (price) and predictors (as could be demand or generation) ar
 The author has decided to implement this table generation manually, to exactly control the lags to use on each case.
 
 \section{Price forecasting}
-The library used to perform forecasts is \textit{sktime}: it simplifies the implementation, reducing boilerplate code and making the scripts cleaner.
+The library used to perform forecasts is \textit{sktime} \cite{DBLP:journals/corr/abs-1909-07872}: it simplifies the implementation, reducing boilerplate code and making the scripts cleaner.
 
-\subsection{Models to compare}
+\subsection{ML models to compare}
 We will test different models, analyzing which of them work better:
 \begin{itemize}
     \item k-Nearest Neighbors (kNN)
@@ -60,7 +60,15 @@ The former creates one model for each value in the forecasting horizon, the latt
     \label{fig:direct-recursive-forecasting}
 \end{figure}
 
-To compare the performance between different models, the author will use the Mean Scaled Absolute Error (MASE) loss function described in Equation \ref{eq:mase}:
+\subsection{Compare ARIMA with ML models}
+All the previously mentioned models are ML based. Some as those based on tree ensembles are very powerful, but they come with some drawbacks compared with their purely based on statistics counterparts. For instance, they need more data to be trained.
+
+This is why on the medium and long term forecasts, as we have less datapoints, we are also testing the performance of ARIMA models so we get an idea of how non-ML models can perform in this situation.
+
+In ARIMA (and generally in classical TS models) it is important to treat the window size as an hyperparameter. The performance of these models can change depending on how many datapoints we use to train.
+
+\subsection{Loss function}
+To compare the performance between different models, the author will use the Mean Absolute Scaled Error (MASE) loss function described in Equation \ref{eq:mase}:
 \begin{equation}
     \label{eq:mase}
     \mathrm{MASE} = \frac{1}{N}\sum_{k=1}^{N}\frac{|p_k-\hat{p}_k|}{\frac{1}{n-1}\sum_{i=2}^{n} |p^\mathrm{in}_i - p^\mathrm{in}_{i-1} |},
@@ -121,6 +129,8 @@ To study which variables affect the electricity price, a different strategy to w
 The study is performed in this way because interpreting SHAP values for each individual forecast horizon point is not viable. Another option would be to average the SHAP values for all the points, but the author thinks that this will make the results less interpretable.
 
 The architecture used for the two models is the one that returned the best result in forecasting. They work over tabular data disposed like in Figure \ref{fig:shap-arrangement}. Once tabulated, data is divided into train and test (Figure \ref{fig:shap-train-test}): the train split is used to train the models and the test partition is the one over the SHAP value are computed.
+
+Nevertheless, there is one exception: if the best performing model is ARIMA, the SHAP values are computed over the best ML model, not over ARIMA. This is because the SHAP package is not directly compatible with ARIMA implementation.
 
 \begin{figure}[H]
 \centering
