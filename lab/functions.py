@@ -23,7 +23,7 @@ SEED = 0
 #                          Outlier management                            #
 ##########################################################################
 
-def remove_outliers_isolation_forests(data, contamination=0.05):
+def remove_outliers_isolation_forests(data, contamination=0.01):
     outlier_detector = IsolationForest(contamination=contamination)
     for column in data:
         outlier_detector.fit(data[[column]].values)
