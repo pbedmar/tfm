@@ -29,7 +29,7 @@ class GenericDataProvider(DataProvider):
         else:
             return NotImplementedError
 
-    def get_series(self, ticker, freq=None, start_index=None, end_index=None, resample_by=None, group_mode=None):
+    def get_series(self, ticker, freq=None, index_type="PeriodIndex", start_index=None, end_index=None, resample_by=None, group_mode=None):
         ts = pd.read_csv(self.path+ticker+".csv", index_col="DATE").squeeze()
         #ts.index = pd.to_datetime(ts.index)
         if freq is not None:
@@ -42,10 +42,19 @@ class GenericDataProvider(DataProvider):
             ts = ts.loc[ts.index <= end_index]
         if resample_by is not None and group_mode is not None:
             ts = ts.resample(resample_by)
+            freq = resample_by
             if group_mode == "sum":
                 ts = ts.sum()
             if group_mode == "mean":
                 ts = ts.mean()
+
+        if index_type == "DatetimeIndex":
+            ts = pd.DataFrame(ts)
+            ts = ts.reset_index(drop=True)
+            ts = ts.set_index(pd.date_range(start_index, end_index, freq=freq))
+            ts = ts.asfreq(freq)
+            ts = ts.sort_index()
+            ts = ts.squeeze()
 
         return ts
 

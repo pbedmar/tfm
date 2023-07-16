@@ -1,7 +1,12 @@
 import os
+import warnings
+from statistics import mean
+from time import time
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import shap
+
 
 from sklearn.ensemble import IsolationForest, RandomForestRegressor, GradientBoostingRegressor
 from sklearn.svm import SVR
@@ -16,6 +21,8 @@ from sktime.forecasting.model_evaluation import evaluate
 from sktime.forecasting.model_selection import SlidingWindowSplitter
 from sktime.forecasting.arima import AutoARIMA
 from sktime.forecasting.compose import make_reduction
+
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
 
 SEED = 0
 
@@ -32,6 +39,25 @@ def remove_outliers_isolation_forests(data, contamination=0.01):
         data[[column]] = data[[column]].interpolate().fillna(method='ffill').fillna(method='bfill')
 
     return data
+
+
+def remove_outliers_isolation_forests_train_test(data_train, data_test, columns):
+    outlier_detector = IsolationForest(contamination=0.01, random_state=0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        for column in columns:
+
+            outlier_detector.fit(data_train[[column]])
+
+            outlier_prediction_train = outlier_detector.predict(data_train[[column]])
+            data_train.loc[outlier_prediction_train == -1, column] = np.nan
+            data_train.loc[:, column] = data_train.loc[:, column].interpolate().fillna(method='ffill').fillna(method='bfill')
+
+            outlier_prediction_test = outlier_detector.predict(data_test[[column]])
+            data_test.loc[outlier_prediction_test == -1, column] = np.nan
+            data_test.loc[:, column] = data_test.loc[:, column].interpolate().fillna(method='ffill').fillna(method='bfill')
+
+    return data_train, data_test
 
 
 ##########################################################################
@@ -63,7 +89,7 @@ def add_date_features(y, X, lags, fh, date_features):
         X['month'] = y.index.month
     if "day" in date_features:
         X['day'] = y.index.day
-    if "hour":
+    if "hour" in date_features:
         X['hour'] = y.index.hour
     if "day_of_week" in date_features:
         X['day_of_week'] = y.index.day_of_week
@@ -78,7 +104,7 @@ def add_date_features(y, X, lags, fh, date_features):
 
 
 ##########################################################################
-#                             Price forecast                             #
+#                         Price forecast (sktime)                        #
 ##########################################################################
 
 def crossval_model_sktime(y, X, regressor_list, regressor_str_list, window_length, max_lag, step_size, fh, save_path, save_name):
@@ -180,6 +206,88 @@ def relation_between_response_and_predictor(y, X, diff_lag):
 
     return forecaster.get_fitted_params()
 
+
+##########################################################################
+#                       Price forecast (skforecast)                      #
+##########################################################################
+
+def crossval_model_skforecast(data, regressor_list, regressor_str_list, initial_window_length, nb_windows, step_size, lags, date_features, forecasting_horizon):
+    cv_results_df_summary = pd.DataFrame(0, index=np.arange(len(regressor_str_list)),
+                                         columns=["model", "mean_mase", "mean_mae", "fit_time"])
+    i = 0
+
+    for regressor_str, regressor in zip(regressor_str_list, regressor_list):
+        y_pred_list = []
+        y_test_list = []
+        mase_list = []
+        mae_list = []
+
+        total_fit_time = 0
+        for w in range(nb_windows):
+            data_window = data[:initial_window_length + w * step_size]
+
+            data_window_train = data_window.iloc[:-forecasting_horizon, :].copy()
+            data_window_test = data_window.iloc[-forecasting_horizon:, :].copy()
+
+            data_window_train, data_window_test = remove_outliers_isolation_forests_train_test(data_window_train, data_window_test, columns=[column for column in data_window_train.columns if column not in date_features])
+
+            y_window_train_iso = data_window_train.iloc[:, 0]
+            X_window_train_iso = data_window_train.iloc[:, 1:]
+            y_window_test_iso = data_window_test.iloc[:, 0]
+            X_window_test_iso = data_window_test.iloc[:, 1:]
+
+            forecaster = ForecasterAutoreg(
+                regressor=regressor,
+                lags=lags
+            )
+
+            start = time()
+
+            forecaster.fit(
+                y=y_window_train_iso,
+                exog=X_window_train_iso
+            )
+
+            end = time()
+            total_fit_time += end-start
+
+            if X_window_test_iso.isna().sum().sum() == 0:
+                y_pred = forecaster.predict(
+                    steps=forecasting_horizon,
+                    exog=X_window_test_iso
+                )
+
+                y_pred = pd.Series(data=y_pred, index=y_window_test_iso.index)
+
+                mase = mean_absolute_scaled_error(y_window_test_iso, y_pred, y_train=y_window_train_iso)
+                mae = mean_absolute_error(y_window_test_iso, y_pred)
+
+                y_test_list.append(y_window_test_iso)
+                y_pred_list.append(y_pred)
+                mase_list.append(mase)
+                mae_list.append(mae)
+
+
+        print("Model:", regressor_str)
+        print("MASEs:", mase_list)
+        print("MAEs:", mae_list)
+        print("Fit time:", total_fit_time)
+        print()
+
+        cv_results_df_summary.iloc[i, 0] = regressor_str
+        cv_results_df_summary.iloc[i, 1] = mean(mase_list)
+        cv_results_df_summary.iloc[i, 2] = mean(mae_list)
+        cv_results_df_summary.iloc[i, 3] = total_fit_time
+        i += 1
+
+        fig, ax = plot_series(
+            data_window.iloc[:, 0],
+            *y_pred_list,
+            markers=["o"] + ["" for x in range(len(y_pred_list))]
+        )
+        plt.title("Cross-validation of " + regressor_str)
+
+    return cv_results_df_summary
 
 ##########################################################################
 #                         Predictor's influence                          #

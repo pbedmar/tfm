@@ -22,7 +22,7 @@ class ESIOSDataProvider(DataProvider):
     def get_metadata(self, ticker=None):
         return self.metadata.get_metadata(ticker)
 
-    def get_series(self, ticker, freq=None, start_index=None, end_index=None, resample_by=None, group_mode=None):
+    def get_series(self, ticker, freq=None, index_type="PeriodIndex", start_index=None, end_index=None, resample_by=None, group_mode=None):
         ts = self.ts_df[ticker].squeeze()
         if freq is not None:
             ts.index = pd.PeriodIndex(ts.index, freq=freq)
@@ -34,14 +34,23 @@ class ESIOSDataProvider(DataProvider):
             ts = ts.loc[ts.index <= end_index]
         if resample_by is not None and group_mode is not None:
             ts = ts.resample(resample_by)
+            freq = resample_by
             if group_mode == "sum":
                 ts = ts.sum()
             if group_mode == "mean":
                 ts = ts.mean()
 
+        if index_type == "DatetimeIndex":
+            ts = pd.DataFrame(ts)
+            ts = ts.reset_index(drop=True)
+            ts = ts.set_index(pd.date_range(start_index, end_index, freq=freq))
+            ts = ts.asfreq(freq)
+            ts = ts.sort_index()
+            ts = ts.squeeze()
+
         return ts
 
-    def get_all_series(self, freq=None, start_index=None, end_index=None, resample_by=None, group_mode=None):
+    def get_all_series(self, freq=None, index_type="PeriodIndex", start_index=None, end_index=None, resample_by=None, group_mode=None):
         df = self.ts_df
         if freq is not None:
             df.index = pd.PeriodIndex(df.index, freq=freq)
@@ -53,10 +62,17 @@ class ESIOSDataProvider(DataProvider):
             df = df.loc[df.index <= end_index]
         if resample_by is not None and group_mode is not None:
             df = df.resample(resample_by)
+            freq = resample_by
             if group_mode == "sum":
                 df = df.sum()
             if group_mode == "mean":
                 df = df.mean()
+
+        if index_type=="DatetimeIndex":
+            df = df.reset_index(drop=True)
+            df = df.set_index(pd.date_range(start_index, end_index, freq=freq))
+            df = df.sort_index()
+            df = df.asfreq(freq)
 
         return df
 
