@@ -24,10 +24,14 @@ One way of detecting stationarity is by generating ACF plots, like the one in Fi
 
 \section{Forecasting}
 In \cite{hyndman2018forecasting}, the author explains that "forecasting is about predicting the future as accurately as possible, given all the information available, including historical data and knowledge of any future events that might impact the forecasts".
-Selecting an adequate forecasting method will depend on the characteristics of the time series, using simpler or more advanced methods.
+
+When forecasting, it's needed to know how many steps in the future want to be predicted. This is called the forecasting horizon, and can be composed of just one or multiple steps.
+
+Other important aspect to consider is the forecasting method to use. Which one to choose will depend on the characteristics of the time series, using simpler or more advanced methods.
+
 
 \subsection{Simple methods}
-In some situations they can be really effective. Some of these methods are: \cite{hyndman2018forecasting}
+In some situations they can be effective. Some of these methods are: \cite{hyndman2018forecasting}
 \begin{itemize}
     \item \textbf{Average method:} Forecast with the mean of the historical data. A very popular variation of this technique is the Moving Average (MA) method, in which the mean is computed not over the complete historical series but over the K more recent points.
     \item \textbf{Naïve method:} Forecast with the last observation of the historical data.
@@ -41,19 +45,68 @@ These methods were developed some decades ago and are based in statistics. They 
     \item \textbf{Auto Regressive Integrated Moving Average (ARIMA):} Combines an autoregressive model, in which a linear model is trained using as predictors the lagged values of the variable, with a moving average and integration. In the moving average, instead of forecasting using lags of the actual variable, past forecasting errors are used as predictors. The integration step is in charge of making the time series stationary.
 \end{itemize}
 
-\subsection{Advanced methods}
-The development in Machine Learning (ML) also arrived to time series. We can use our favourite models as Random Forest, k-Nearest Neighbours or even LSTM to forecast the future. But data has to be structured in a particular way, using lags so these models can capture autocorrelation.
+\subsection{More advanced methods}
+The development in Machine Learning (ML) also arrived to time series, being models such as Random Forest, k-Nearest Neighbours or LSTM used to forecast the future \cite{lazzeri2020machine}.
+In classical time series models as ARIMA data can be directly introduced in the model without restructuring it: but when using ML-based architectures, data has to be reshaped so the models can recover autocorrelation.
 
-\section{Predictor's influence}
+See Figure \ref{fig:ml-arrangement}.
+On it, the response (price) and predictors (as could be demand or generation) are included together with some response lags.
+This data structure is what is used as input for the ML models, not the raw data itself.
+
+\begin{figure}[H]
+\centering
+    \caption{Tabular form in which data is disposed for ML models. On it, n is the number of observations in the time series and k is the number of lags in use.}
+    \label{fig:ml-arrangement}
+    \fbox{\includegraphics[scale=0.4]{images/methodology/ml_arrangement}}
+\end{figure}
+
+\noindent Some ML models that can be used to forecast are the following:
+\begin{itemize}
+    \item \textbf{k-Nearest Neighbors (kNN)}
+    \item \textbf{Support Vector Machines (SVM)} %This is why SVMs are also called as large margin classifiers
+    \item \textbf{Random Forests (RF)}
+    \item \textbf{Gradient Boosted Trees (GBT)}
+\end{itemize}
+
+\subsection{Error metrics}
+To asses the quality of a forecast it is necessary to define an error metric. This is an important step, as different metrics will penalize different aspects of the forecast. In the context of time series, these are some widely used: \cite{hyndman2006another,ts-metrics-formulas}
+\begin{itemize}
+    \item \textbf{Mean Absolute Error (MAE):}
+    \begin{equation}
+        \label{eq:mae}
+        \text{MAE}(y, \hat{y}) = \frac{ \sum_{i=0}^{N - 1} |y_i - \hat{y}_i| }{N}
+    \end{equation}
+    This metric, as it names indicates, is computed from the absolute difference between the observed and forecasted value. It is a scale-dependent measure, so it can't be used to compare series with different units. It ranges from 0 to $+\infty$, being 0 the smallest error.
+    \item \textbf{Mean Absolute Percentage Error (MAPE):}
+    \begin{equation}
+        \label{eq:mape}
+        \text{MAPE}(y, \hat{y}) = \frac{100\%}{N} \sum_{i=0}^{N - 1} \frac{|y_i - \hat{y}_i|}{|y_i|}.
+    \end{equation}
+    Similar to the previous metric but scale-independent, this is why it can be a good option to compare series with different units. Nevertheless, it comes with two major drawbacks. When the true value $y_i$ is close to 0, this metric becomes undefined. Apart, it puts a heavier penalty on positive than on negative errors. It ranges from 0 to $+\infty$.
+    \item \textbf{Mean Absolute Scaled Error (MASE):}
+    \begin{equation}
+        \label{eq:mase}
+        \text{MASE}(y, \hat{y}) = \frac{1}{N}\sum_{k=1}^{N}\frac{|p_k-\hat{p}_k|}{\frac{1}{n-1}\sum_{i=2}^{n} |p^\mathrm{in}_i - p^\mathrm{in}_{i-1} |},
+    \end{equation}
+    Scale-independent measure. It is only undefined in the case of all historical observations being equal. Again, it ranges from 0 to $+\infty$.
+
+\end{itemize}
+
+\noindent In Chapter \ref{ch:methodology}, we will discuss which models are more adequate for our problem and which is the most suitable metric between those presented here. In addition, other eminently practical questions on the design of the methodology will be addressed.
+
+\section{Model explainability}
 %When forecasting (and predicting in general) it is important to build a model that adequately captures the underlying patterns of data. This will lead to accurate and strong predictions.
 %
-%But in many cases it is also important to understand how data is affecting the model. Which variables are more important in the prediction? How and why? This is an issue that model interpretability attempts to solve.
-TODO
+%But in many cases it is also important to understand how data is affecting the model. Which variables are more important in the prediction? How and why? This is an issue that model interpretability attempts to solve. A way of achieving this is using SHAP values.
+
+The goal of this project is not just to forecast electricity prices, but also to understand which variables are influencing them. The challenge with many models is that they act as a black box, so understanding why some variables are more or less important in the final prediction is not straightforward.
+
+This is what SHapley Additive exPlanations (SHAP) \cite{lundberg2017unified} values try to overcome. On them, features are treated as players that participate in a game. The game consists in replicating the output of the model, checking what is the contribution of each player to the final result. This game is repeated for each data observation individually \cite{shap-simplified}. This method is fascinating as no internal knowledge of the model is required, we just need to know the model inputs and output.
+
+Obtaining the SHAP values will enable us to explain how the predictors influence the forecast.
 
 
-
-
-sktime \cite{DBLP:journals/corr/abs-1909-07872}
-pmdarima \cite{pmdarima}
-scikit-learn \cite{scikit-learn}
-SHAP package \cite{shap-package}
+%sktime \cite{DBLP:journals/corr/abs-1909-07872}
+%pmdarima \cite{pmdarima}
+%scikit-learn \cite{scikit-learn}
+%SHAP package \cite{shap-package}

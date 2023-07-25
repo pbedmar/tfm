@@ -244,16 +244,15 @@ hmargin=2.7cm
 			\bigskip
 			
 		\end{Large}
-		 	{\Huge ``Thesis title''}\\
+		 	{\Huge ``Time-series models to explain the evolution of the electricity prices in the short and the long term''}\\
 		 	\vspace*{0.5cm}
 	 		\rule{10.5cm}{0.1mm}\\
 			\vspace*{0.9cm}
-			{\LARGE Author's complete name}\\ 
+			{\LARGE Pedro Bedmar López}\\
 			\vspace*{1cm}
 		\begin{Large}
-			1st Tutor complete name\\
-			2nd Tutor complete name\\
-			Place and date\\
+			Supervisor: Francisco Javier Nogales Martín\\
+			Madrid, the 10th of September 2023\\
 		\end{Large}
 	\end{center}
 	
@@ -287,10 +286,12 @@ hmargin=2.7cm
 \thispagestyle{plain}
 \setcounter{page}{3}
 	
-	% ESCRIBIR EL RESUMEN AQUÍ
+	The goal of this Master Thesis is to develop time-series models to capture the main factors affecting electricity prices.
+	The relationships between the factors and electricity prices depend on the data frequency (hourly, daily, monthly) but also on main drivers like: the consumption, the available renewable power (mainly wind and solar), gas and other commodity prices (and also CO2).
+	These models can not only be used to forecast prices, but also to understand how these drivers are influencing them.
 	
 	\textbf{Keywords:}
-	% Escribir las palabras clave aquí
+	energy market, electricity prices, time series, forecasting, model explainability
 	
 	\vfill
 \end{abstract}
@@ -299,20 +300,20 @@ hmargin=2.7cm
 	\mbox{}
 
 
-%----------
-%	DEDICATORIA
-%----------	
-\chapter*{Dedication}
-
-\setcounter{page}{5}
-	
-	% ESCRIBIR LA DEDICATORIA AQUÍ	
-		
-	\vfill
-	
-	\newpage %página en blanco o de cortesía
-	\thispagestyle{empty}
-	\mbox{}
+%%----------
+%%	DEDICATORIA
+%%----------
+%\chapter*{Dedication}
+%
+%\setcounter{page}{5}
+%
+%	% ESCRIBIR LA DEDICATORIA AQUÍ
+%
+%	\vfill
+%
+%	\newpage %página en blanco o de cortesía
+%	\thispagestyle{empty}
+%	\mbox{}
 	
 
 %----------
@@ -339,15 +340,15 @@ hmargin=2.7cm
 \thispagestyle{empty}
 \mbox{}
 
-%--
-%Índice de tablas. Si no se incluyen, comenta las líneas siguientes
-%-
-\listoftables
-\thispagestyle{fancy}
-
-\newpage %página en blanco o de cortesía
-\thispagestyle{empty}
-\mbox{}
+%%--
+%%Índice de tablas. Si no se incluyen, comenta las líneas siguientes
+%%-
+%\listoftables
+%\thispagestyle{fancy}
+%
+%\newpage %página en blanco o de cortesía
+%\thispagestyle{empty}
+%\mbox{}
 
 
 
@@ -373,7 +374,7 @@ hmargin=2.7cm
 \input{chapters/03_state_of_the_art}
 \input{chapters/04_energy_market}
 \input{chapters/05_methodology}
-\input{chapters/06_analysis}
+%\input{chapters/06_analysis}
 \input{chapters/07_conclusions}
 
 %----------
