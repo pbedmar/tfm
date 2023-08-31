@@ -1,12 +1,12 @@
 \chapter{Research methodology and implementation}
 \label{ch:methodology}
 In this chapter the author discusses the methodology to be followed in the experiments. This is an important step, as building it correctly will lead to significant and meaningful results.
-Three phases are designed: data acquisition and preprocessing, price forecasting and predictor's importance.
+Three phases are designed: data acquisition and preprocessing, price forecasting and predictor's importance analysis.
 
 In the first phase, all the necessary data will be downloaded with the finest possible granularity.
 When studying broader timespans, it will be aggregated.
 
-In the last two phases the author details the analysis performed: the same procedure will be used to analyze in an hourly, daily and monthly fashion, changing the parameters for every case.
+In the last two phases the author details the analysis performed: the same procedure will be used to analyze in an hourly, daily and monthly fashion, setting specific parameters for every case.
 On the other hand, for the yearly level, as there is not enough data to perform an statistical study, a descriptive and visual analysis will be performed.
 
 During the previous years, many time series libraries have been developed for both R and Python. To choose the most adequate programming language to develop the experiments, the author will discuss the benefits and drawbacks of the two most used languages by data scientists:
@@ -15,7 +15,7 @@ During the previous years, many time series libraries have been developed for bo
     \item \textbf{Python:} The currently most used Data Science language, is a general-purpose programming language. In the previous three years many new time series libraries have emerged for this language as pycaret, sktime or skforecast.
 \end{itemize}
 
-Between the two languages, the author will stick to Python. Being a general-purpose language, it is not only used in Data Science but in other fields as Web Development. For this project, in which APIs will be used to retrieve data, this is an advantage. Apart, the existing model explainability libraries are more advanced in Python. Finally, as the author has already worked with time series in R, is a good opportunity to discover another programming language.
+Between the two languages, the author will stick to Python. It is a general purpose language, being not only used in Data Science but in other fields as Web Development. For this project, in which APIs will be used to retrieve data, this is an advantage. Apart, the existing model explainability libraries are more advanced in Python. Finally, as the author has already worked with time series in R, it is a good opportunity to discover them in a different programming language.
 
 \subsubsection{Note on scaling and outlier detection}
 In all the steps of the analysis, both when forecasting and computing SHAP values, data is scaled and outliers are detected and interpolated properly. This is because some models in use, specially those based on distances, are sensible to scale, and all the models can be affected by an unusually high or low value in the series.
@@ -34,7 +34,7 @@ To simplify this process, the author has created two abstract classes that are i
     \fbox{\includegraphics[scale=0.4]{images/methodology/data_down_prov}}
 \end{figure}
 
-\textit{DataDownloader} has two main methods implemented by the materialized classes. They are \textit{downloader()} and \textit{etl()}. The first one is in charge of connecting to an API or URL and downloading the raw information on it. The second one, cleans the data and stores it in a normalized file, see Figure \ref{fig:cleandata-example}: using the same format for all data sources will simplify the manipulation process in \textit{DataProvider}. \textit{etl()} is also the place where missing values are inputted using linear interpolation or date inconsistencies due to summer/winter time changes are fixed.
+\textit{DataDownloader} has two main methods implemented by the different materialized classes: they are \textit{downloader()} and \textit{etl()}. The first one is in charge of connecting to an API or URL and downloading the raw information on it. The second one, cleans the data and stores it in a normalized file, see Figure \ref{fig:cleandata-example}: using the same format for all data sources will simplify the manipulation process in \textit{DataProvider}. \textit{etl()} is also the place where missing values are inputted using linear interpolation or date inconsistencies due to summer/winter time changes are fixed.
 
 For now, only ESIOS downloads the data using an API. For the other sources, data is downloaded manually from the browser, as most of them don't have a public API.
 
@@ -62,14 +62,14 @@ A less important but also interesting class is \textit{Metadata}. It can be used
 \end{figure}
 
 \section{Price forecasting}
-The first step of the analysis is to produce forecasts. As the author previously stated, there exists some libraries in Python that could be potential candidates to be used in this project. All of them has been extensively tested before deciding the most adequate:
+The first step of the analysis is to produce forecasts. As the author previously stated, there exist some libraries in Python that could be potential candidates to be used in this project. All of them have been extensively tested before deciding the most adequate:
 \begin{itemize}
     \item \textbf{pycaret\cite{PyCaret}:} It is an AutoML library providing a time series analysis suite, apart from methods for other types of problems. It provides a very high level interface, so it's not adequate for our task.
     \item \textbf{sktime:} Probably the most advanced time series library for Python nowadays. It is compatible with \textit{scikit-learn}\cite{scikit-learn} models, contains implementations of classical models as ARIMA or ETS and lets the user build an end-to-end forecast pipeline. Nevertheless, it has a big disadvantage for us: to create the tabular form described in Figure \ref{fig:ml-arrangement} only consecutive lags can be specified. The user can't specify specific lags, something which is necessary for this project.
     \item \textbf{skforecast\cite{skforecast}:} Less advanced than the previous package, but includes the possibility of specifying specific lags. It is also compatible with \textit{scikit-learn} models.
 \end{itemize}
 
-The library finally selected to perform them is \textit{skforecast}, in combination with \textit{pandas}.
+\noindent The library finally selected to perform them is \textit{skforecast}, in combination with \textit{pandas}.
 
 \subsubsection{Algorithms to be compared}
 In Chapter \ref{ch:state-of-the-art}, different forecasting models are presented, both simple and advanced. In this project, we will focus on the use of advanced methods implemented in \textit{scikit-learn}. This is because the models on this library are directly compatible with \textit{SHAP}\cite{shap-package} package, which will be needed later to interpret predictor's importance. Statistical models libraries such as \textit{pmdarima}\cite{pmdarima} have no direct compatibility with \textbf{SHAP}, so they won't be used. Concretely, the models to be compared are the following, we will use the best performing one on each case:
@@ -82,7 +82,7 @@ In Chapter \ref{ch:state-of-the-art}, different forecasting models are presented
 All of them are implemented in \textit{scikit-learn} and are directly compatible with \textit{skforecast}. The first is a distance-based algorithm, while the other two are tree-based ones. Originally, other models such as Support Vector Machines were also evaluated but discarded for the final project version, as they were not producing quality results.
 
 \subsubsection{Direct vs recursive forecasting}
-Now let's talk about the strategy followed to perform forecasts. It's important to remember that multi-step forecasting is being performed, as the forecast horizon is composed of several values. There are two main strategies to perform multi-step forecasting, direct and recursive: the former creates one model for each value in the forecast horizon, the latter applies a recursive process in which each new prediction is based on the previous one \cite{direct-recursive-forecasting}, so only one model is created. See Figure \ref{fig:direct-recursive-forecasting}. Recursive strategy is what is used on this project, as it is less computationally expensive.
+Now let's talk about the strategy followed to perform forecasts. It's important to know that multi-step forecasting is being performed, as the forecast horizon will be composed of several values. There are two main strategies to perform multi-step forecasting, direct and recursive: the former creates one model for each value in the forecast horizon, the latter applies a recursive process in which each new prediction is based on the previous one \cite{direct-recursive-forecasting}, so only one model is created. See Figure \ref{fig:direct-recursive-forecasting}. Recursive strategy is what is used on this project, as it is less computationally expensive.
 
 \begin{figure}[H]
 \centering
@@ -102,10 +102,10 @@ Now let's talk about the strategy followed to perform forecasts. It's important 
 \end{figure}
 
 \subsubsection{Loss function}
-To compare the performance between different models, the author has decided to use the Mean Absolute Scaled Error (MASE) function described in Equation \ref{eq:mase}. It is resistant to zero observations and scale-invariant, so if we want to compare forecasts of different aggregation levels is the most adequate between those presented in Chapter \ref{ch:state-of-the-art}.
+To compare the performance between different models, the author has decided to use the Mean Absolute Scaled Error (MASE) function described in Equation \ref{eq:mase}. It is resistant to zero observations and scale-invariant, so if we want to compare forecasts errors of different aggregation levels is the most adequate between those presented in Chapter \ref{ch:state-of-the-art}.
 
 \subsection{Performance evaluation}
-To perform accurate forecasts, we will firstly compare the performance of the algorithms presented above using cross validation. Once we know which one returns the highest score, we train it over all the cross-validation data and give a final estimation over a test set. See Figure \ref{fig:cross-train-test} to visualize this process.
+To perform accurate forecasts, we will firstly compare the performance of the algorithms presented above using cross-validation. Once we know which one returns the highest score, we train it over all the cross-validation data and give a final estimation over a test set. See Figure \ref{fig:cross-train-test} to visualize this process.
 
 \begin{figure}[H]
 \centering
@@ -118,22 +118,23 @@ To perform accurate forecasts, we will firstly compare the performance of the al
 Two well known strategies used to divide data to perform model selection are holdout and cross-validation.
 In the former, data is partitioned in two splits, train and test, e.g. 80\% train and 20\% test.
 The problem with this strategy is that we are only assessing the performance of the model in a reduced portion of data.
-On the other hand, if we use cross-validation we divide the data in multiple folds: on an iterative process, one is reserved for testing and the rest for training, changing the test fold on every iteration.
+On the other hand, if we use cross-validation we divide the data in multiple folds: on an iterative process, one is reserved for testing and the rest for training, modifying the test fold on every iteration.
 At the end, we manage to assess the performance in the complete dataset.
 
-\noindent But using k-fold cross validation is not suitable for time series forecasting \cite{cross-validation-types}:
+\noindent But using k-fold cross-validation is not suitable for time series forecasting \cite{cross-validation-types}:
 \begin{enumerate}
-    \item Test data can appear before train data.
-    \item Data leakage can happen if test data appears after train folds, as the model knows extra information about the future.
+    \item Test data can appear before all the train data.
+    \item Data leakage occurs if some train data appears after the test fold, as the model knows extra information about the future.
 \end{enumerate}
 
-There exist other techniques that solve this problem, for example sliding or expanding window cross validation.
+There exist other variations that prevent these problems, for example sliding or expanding window cross-validations.
 In sliding window splitters, the folds are created by scrolling a window of constant size through data.
 This window is divided into train and test, maintaining the size of both partitions on all the windows.
 
-In the case of expanding windows, its size is not constant but it grows. Concretely, the test partition remains the same through different windows and the train one grows collecting all the previous observations.
+In the case of expanding windows, its size is not constant but it grows.
+Concretely, the test partition maintains the same size through different windows and the train one grows collecting all the previous observations.
 
-In Figure \ref{fig:sliding-expanding-windows} the author exposes a comparison between both strategies. For this project we are using sliding windows.
+In Figure \ref{fig:sliding-expanding-windows} the author shows a comparison between both strategies.
 
 \begin{figure}[H]
 \centering
@@ -145,26 +146,26 @@ In Figure \ref{fig:sliding-expanding-windows} the author exposes a comparison be
 The author believes that expanding windows are the best option for this project: data is scarce, so reusing previous observations is a possible solution to fight this problem.
 
 Once that the data has been preprocessed and the cross-validation pipeline has been built, is time to run it.
-The results will indicate which is the most suitable model on each case.
+The results will indicate which is the most suitable model.
 
 \subsubsection{Final model}
-Now that the most suitable model is known, it is trained over the data used for cross validation and tested over new data that haven't been used previously, corresponding with the newest data in the series. This will be the final prediction shown in this report, together with a final performance estimation.
+The best model will be the one scoring the lowest MASE.
+
+Now that the most suitable model is known, it is trained over the data used for cross validation and tested over new data that haven't been used previously, corresponding with the newest data in the series: the size of this test partition matches the size of the forecast horizon. The forecast computed over the test partition will be shown in this report, together with a final performance estimation.
 
 \section{Predictor's importance with SHAP values}
-As we studied in Chapter \ref{ch:state-of-the-art}, SHAP values are a state-of-the-art way of explaining predictor's importance in ML models. Unluckily, the existing implementation (\cite{shap-package}) is not directly compatible with time series libraries. On the other hand, it works with \textit{scikit-learn} models.
+As we studied in Chapter \ref{ch:state-of-the-art}, SHAP values are a state-of-the-art way of explaining predictor's importance in ML models. Unluckily, the existing implementation \cite{shap-package} is not directly compatible with time series libraries. On the other hand, it works with \textit{scikit-learn} models.
 
-The strategy followed will differ from the one used in the previous section. We can't compute SHAP values for each member of the forecast horizon, as interpreting each would be impossible. This is why we are only computing them for the first element of the horizon.
-
-Also, the tabular structure in Figure \ref{fig:ml-arrangement} has to be built completely by hand on \textit{pandas}, as no time series library can be used. It is divided in train (80\%) and test (20\%), the former is used to train the best performing \textit{scikit-learn} model and the latter is used to compute the SHAP values.
+The strategy followed will differ from the one used in the previous section: the tabular form in Figure \ref{fig:shap-arrangement} will be built manually and scikit-learn will be directly used.
 
 \begin{figure}[H]
 \centering
     \caption{Data disposition to evaluate the influence of predictors.}
     \label{fig:shap-arrangement}
-    \fbox{\includegraphics[scale=0.38]{images/methodology/shap_arrangement_first}}
+    \fbox{\includegraphics[scale=0.4]{images/methodology/shap_arrangement}}
 \end{figure}
 
-The architecture used for the two models is the one that returned the best result in forecasting. They work over tabular data disposed like in Figure \ref{fig:shap-arrangement}. Once tabulated, data is divided into train and test (Figure \ref{fig:shap-train-test}): the train split is used to train the models and the test partition is the one over the SHAP values are computed.
+This table is divided in train (80\%) and test (20\%), the former is used to train the best performing \textit{scikit-learn} model and the latter is used to compute the SHAP values, see Figure \ref{fig:shap-train-test}. The model used is the one that returned the best result in forecasting.
 
 \begin{figure}[H]
 \centering

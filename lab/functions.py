@@ -327,6 +327,8 @@ def final_model_skforecast(data_train, data_test, best_model, best_model_str, la
     )
 
     y_pred = pd.Series(data=y_pred, index=y_test_iso.index)
+    mase = mean_absolute_scaled_error(y_test_iso, y_pred, y_train=y_train_iso)
+    print("MASE:", mase)
 
     residuals = abs(y_pred - y_test_iso)
     RMSFE = np.sqrt(sum([x ** 2 for x in residuals]) / len(residuals))
@@ -340,7 +342,7 @@ def final_model_skforecast(data_train, data_test, best_model, best_model_str, la
     fig, ax = plt.subplots(figsize=(13, 4))
     sns.lineplot(data=y_test_iso, palette="deepskyblue", marker="o", ax=ax)
     sns.lineplot(data=y_pred, palette="orange", marker="o", ax=ax)
-    ax.fill_between(y_test_iso.index, (y_test_iso - band_size), (y_test_iso + band_size), color='orange', alpha=.1)
+    ax.fill_between(y_test_iso.index, (y_pred - band_size), (y_pred + band_size), color='orange', alpha=.1)
     ax.set_title(plot_title)
     ax.set_xlabel('Date')
     ax.set_ylabel('Daily SPOT market price')

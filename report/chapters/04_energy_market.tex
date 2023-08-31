@@ -1,12 +1,12 @@
 \chapter{The Spanish electricity market}
 \label{ch:electricity-market}
-In this section we briefly describe how the wholesale electricity market works in Spain.
+In this section is briefly described how the wholesale electricity market works in Spain.
 In 1998, the current regulation came into operation, replacing the previous system in which Red Eléctrica de España (REE) and the Ministry of Industry and Energy entirely planned their transactions.
 
-It allowed the private sector to freely plan the construction of generation plants and the possibility of bidding energy prices, and created the figure of energy supplier (being the consumer able to choose one).
+It allowed the private sector to freely plan the construction of generation plants and the possibility of bidding energy prices, creating the figure of energy supplier (being the consumer able to choose one).
 Distribution of energy remained regulated by the government, who assigns this task to a unique company per region. \cite{mercado-electrico-mincotur}
 
-The wholesale electricity market differs from the retail market. In the former generators sell energy to suppliers, while in the latter suppliers sell energy to consumers. Different agents participate in both, and they are regulated by different rules, being more flexible in the retail market.
+Two markets coexist under this regulation: wholesale and retail markets. In the former, generators sell energy to suppliers, while in the latter suppliers sell energy to consumers. They are regulated by different rules, being more flexible in the retail market.
 
 \section{Main agents}
 Different agents conform this complex system. Each one is in charge of a specific task:\cite{mercado-electrico-endesa, organismos-reguladores-holaluz}
@@ -36,17 +36,13 @@ On the other hand, generators make their sell bids which are ordered from higher
 \end{figure}
 
 The point where the two curves intersect defines the price at which energy will be sold. On the left of this intersection appear the transactions that will take place, while those on the right will not be materialized, as the generators ask for more money than what suppliers are willing to pay.
-All the sold electricity will be available at that intersection price, the generators will receive that price even if they bid for less.
+All the sold electricity will be available at that intersection price, the generators will receive that price even if they bid for less. These characteristics are what define a marginal pricing market.
 
-These characteristics are what define a marginal pricing market.
-This process will be repeated for each hour of the following day, having a total of 24 different prices.
+This process will be repeated for each hour of the following day, having a total of 24 different curves and prices. This price will be obtained both from ESIOS (short term) and OMIE (long term): both data sources contain the same information, as prices are built in a regulated basis as explained in the previous paragraphs. The data acquired goes from 01-1998 to 03-2023, in an hourly fashion.
 
-This variable will be obtained both from ESIOS (short term) and OMIE (long term): both data sources contain the same information, as prices are built in a regulated basis as explained in the previous paragraphs. The data acquired goes from 01-1998 to 03-2023, in an hourly fashion.
-
-Let's visually analyze the data in Figure \ref{fig:spot-price-series}. On an hourly scale, the author appreciates some cyclicity happening every 12 hours, something that can be confirmed in the ACF plot.
+Let's visually analyze the data in Figure \ref{fig:spot-price-series}, corresponding to the last entries on the downloaded series. In an hourly scale, the author appreciates some cyclicity occurring every 12 hours, something that can be confirmed in the ACF plot.
 Concretely, peaks in price appear at the early morning and in the evening.
-During the night and late morning the price goes down: this could be due to our daily routines, as we consume less energy while we sleep or while we are working.
-Nevertheless, we will know more about this in the future sections, when we study the predictor's importance.
+During the night and late morning the price goes down: this could be due to our daily routines, as we consume less energy while we sleep or while we are working. Also, the solar production peaks close to noon, reducing price around that hour.
 On a monthly scale the author doesn't find cyclicity. But it is interesting to mention the peak in prices between 2021 and 2023 due to the war in Ukraine, as Europe is very dependent of fossil fuels imported from Russia \cite{lopez2022geopolitica}.
 
 \begin{figure}[H]
@@ -82,14 +78,14 @@ On a monthly scale the author doesn't find cyclicity. But it is interesting to m
 
 \section{Variables affecting the electricity price}
 As the price is built in the free market, defining a priori the variables that influence it is difficult.
-Many factors can affect its value, even companies strategic decisions that can't be predicted, but there are some variables that could fit in the equation that will be described in the following subsections. \cite{mercado-electrico-periodico-energia, mercado-electrico-cambio-energetico}
+Many factors can affect its value, as companies strategic decisions that can't be predicted, but there are some variables that could fit in the equation that will be described in the following subsections. \cite{mercado-electrico-periodico-energia, mercado-electrico-cambio-energetico}
 
 \subsection{Demand}
-The energy consumption can affect the price, specially in a marginal pricing market.
+The energy consumption can affect price, specially in a marginal pricing market.
 As generation bids are ordered in the supply curve from cheaper to expensive, if the demand is high the intersection point will probably move to the right leading to a higher price.
 The measured demand curves have been downloaded from ESIOS, obtaining data from 01-2014 to 03-2023. The granularity they originally have is of one reading every 10 minutes, but the author has aggregated this into hourly measurements.
 
-If we study the plots in Figure \ref{fig:demand-series} we find how there is cyclicity at a daily level, there are repeating patterns each 24 hours, which makes sense due to people daily routines. There is also weekly cyclicity, existing higher consumption during the work days than during the weekends: this could be related with industry energy demand. It is also happening at yearly and half-yearly levels.
+If the plots below are studied, cyclicity at the hourly aggregated data (Figure \ref{fig:demand-series-hour} and \ref{fig:demand-series-hour-acf}) can be found: there are repeating patterns each 24 hours, which makes sense due to people daily routines. There is also weekly cyclicity in the daily aggregated data (Figure \ref{fig:demand-series-day} and \ref{fig:demand-series-day-acf}), existing higher consumption during the work days than during the weekends: this could be related with industry energy demand. For monthly aggregated data (Figure \ref{fig:demand-series-month} and \ref{fig:demand-series-month-acf}), it is also happening (but with less strength) in yearly and half-yearly fashions.
 
 \begin{figure}[H]
 \centering
@@ -97,11 +93,13 @@ If we study the plots in Figure \ref{fig:demand-series} we find how there is cyc
         \centering
         \includegraphics[width=1\linewidth]{images/variable_analysis/esios_demand_h_350}
         \caption{Per hour, 350 hours window.}
+        \label{fig:demand-series-hour}
     \end{subfigure}
     \begin{subfigure}{.45\textwidth}
         \centering
         \includegraphics[width=1\linewidth]{images/variable_analysis/esios_demand_h_acf}
         \caption{Per hour, ACF plot.}
+        \label{fig:demand-series-hour-acf}
     \end{subfigure}
 \end{figure}
 
@@ -110,11 +108,13 @@ If we study the plots in Figure \ref{fig:demand-series} we find how there is cyc
         \centering
         \includegraphics[width=1\linewidth]{images/variable_analysis/esios_demand_d_90}
         \caption{Aggregated by day, 90 days window.}
+         \label{fig:demand-series-day}
     \end{subfigure}
     \begin{subfigure}{.45\textwidth}
         \centering
         \includegraphics[width=1\linewidth]{images/variable_analysis/esios_demand_d_acf}
         \caption{Per day, ACF plot.}
+        \label{fig:demand-series-day-acf}
     \end{subfigure}
 \end{figure}
 
@@ -123,13 +123,14 @@ If we study the plots in Figure \ref{fig:demand-series} we find how there is cyc
         \centering
         \includegraphics[width=1\linewidth]{images/variable_analysis/esios_demand_m_40}
         \caption{Aggregated by month, 40 months window.}
+        \label{fig:demand-series-month}
     \end{subfigure}
     \begin{subfigure}{.45\textwidth}
         \centering
         \includegraphics[width=1\linewidth]{images/variable_analysis/esios_demand_m_acf}
         \caption{Per month, ACF plot.}
+        \label{fig:demand-series-month-acf}
     \end{subfigure}
-
     \caption{Electricity demand curves analysis.}
     \label{fig:demand-series}
 \end{figure}
@@ -150,9 +151,9 @@ We have downloaded generation data of the following technologies:
     \item \textbf{Wind:} Existing yearly and half-yearly cyclicities have been found. This could make sense as wind may depend on temperature through the year. There is also a positive trend in the last years of wind energy generation.
     \item \textbf{Hydropower:} Strong daily cyclicity, with generation peaks in the hours with higher energy demand (Figures \ref{fig:hydro-series} and \ref{fig:hydro-acf}). There seems to be some weekly cyclicity but not very strong. The same happens in a yearly level.
     \item \textbf{Solar:} Really high daily cyclicity (Figure \ref{fig:solar-acf}). Cyclicity also in a yearly fashion, with a positive trend in the solar energy generation in the previous years (Figure \ref{fig:solar-series}).
-    \item \textbf{Nuclear:} In the short term it is a very stable energy technology, with not many generation changes between nearby hours, see Figure \ref{fig:nuclear-series}. Maybe some cycles appear in a yearly and half-yearly fashion, but they are not very clear. There is no trend in the long term for the generation with this technology.
+    \item \textbf{Nuclear:} In the short term it is a very stable energy technology, with not many generation changes between nearby hours, see Figure \ref{fig:nuclear-series}. Maybe some cycles appear in a yearly and half-yearly fashion, but they are not very clear.
     \item \textbf{Combined cycles:} This technology, powered by gas, uses the combustion to move turbines. Apart, the residual heat is used to heat water and move other turbines, increasing generation efficiency. There exists some cyclicity in half-daily, daily and weekly horizons.
-    \item \textbf{Coal:} This raw material has been a very popular fuel in thermal power plants, but in the previous years its use has decreased a lot due to how pollutant is. As can be seen in Figure \ref{fig:coal-series}, the use of coal as generation fuel has decreased a lot in the last years.
+    \item \textbf{Coal:} This raw material has been a very popular fuel in thermal power plants, but in the previous years its use has decreased a lot due to how pollutant is. This behaviour can be seen in Figure \ref{fig:coal-series}.
 \end{itemize}
 
 \begin{figure}[H]
@@ -268,6 +269,6 @@ This is correlated with the demand and the availability of renewable energy gene
 
 \vspace{1.3cm}
 
-The previous predictors can improve the model capabilities, as they could add extra explicative information about the price.
-In the next sections the author will analyze which of them are explaining the most in the specific studied models.
+\noindent The previous predictors can improve the model capabilities, as they could add extra explicative information about the price.
+In the next sections the author will analyze which of them are explaining the most on each data aggregation level.
 

@@ -17,9 +17,9 @@ They can be combined in an additive way ($y_t = S_t + C_t + T_t + R_t$), a multi
 A very important concept in time series is stationarity.
 A stationary time series is one whose properties does not change with time, with the moment in which the series is observed. If some trend or seasonality is present, it doesn't hold.
 
-Usually, an stationary time series will have no predictable patterns in the long term. Nevertheless, a cyclic behaviour with no trend nor seasonality is stationary.
+Usually, a stationary time series will have no predictable patterns in the long term. Nevertheless, a cyclic behaviour with no trend nor seasonality is stationary.
 
-One way of detecting stationarity is by generating ACF plots, like the one in Figure \ref{fig:solar-acf}. They also are useful to detect cycles in the series.
+One way of detecting stationarity is by generating ACF plots. These are also useful to detect seasonality in the series. \cite{hyndman2018forecasting}
 
 
 \section{Forecasting}
@@ -39,7 +39,7 @@ In some situations they can be effective. Some of these methods are: \cite{hyndm
 \end{itemize}
 
 \subsection{Classical methods}
-These methods were developed some decades ago and are based in statistics. They have been the de facto standard to forecast time series until the creation of more advanced methods. Some of them are: \cite{lazzeri2020machine, hyndman2018forecasting}
+These methods were developed some decades ago and are based on statistics. They have been the de facto standard to forecast time series until the creation of more advanced methods. Some of them are: \cite{lazzeri2020machine, hyndman2018forecasting}
 \begin{itemize}
     \item \textbf{Exponential smoothing (ETS):} Uses the MA method, assigning higher weights to more recent values and lower weights to those which are more distant in time. Combines Error, Trend and Seasonality components to model the series.
     \item \textbf{Auto Regressive Integrated Moving Average (ARIMA):} Combines an autoregressive model, in which a linear model is trained using as predictors the lagged values of the variable, with a moving average and integration. In the moving average, instead of forecasting using lags of the actual variable, past forecasting errors are used as predictors. The integration step is in charge of making the time series stationary.
@@ -50,7 +50,7 @@ The development in Machine Learning (ML) also arrived to time series, being mode
 In classical time series models as ARIMA data can be directly introduced in the model without restructuring it: but when using ML-based architectures, data has to be reshaped so the models can recover autocorrelation.
 
 See Figure \ref{fig:ml-arrangement}.
-On it, the response (price) and predictors (as could be demand or generation) are included together with some response lags.
+On it, the response (price) and predictors (as could be demand or generation) are included together with some response lags, acting as predictors too.
 This data structure is what is used as input for the ML models, not the raw data itself.
 
 \begin{figure}[H]
@@ -60,12 +60,12 @@ This data structure is what is used as input for the ML models, not the raw data
     \fbox{\includegraphics[scale=0.4]{images/methodology/ml_arrangement}}
 \end{figure}
 
-\noindent Some ML models that can be used to forecast are the following:
+\noindent Some ML models that could be used to forecast are the following: \cite{berzal2018redes}
 \begin{itemize}
-    \item \textbf{k-Nearest Neighbors (kNN)}
-    \item \textbf{Support Vector Machines (SVM)} %This is why SVMs are also called as large margin classifiers
-    \item \textbf{Random Forests (RF)}
-    \item \textbf{Gradient Boosted Trees (GBT)}
+    \item \textbf{k-Nearest Neighbors (kNN):} Distance-based algorithm which computes the label of a new observation as the mean of the labels of the k closer training observations. It is known as a lazy learner, in the sense that it doesn't build a proper model, but it directly uses the training data to classify new observations.
+    \item \textbf{Support Vector Machines (SVM):} Also known as large margin classifiers, SVMs are algorithms that try to model a function that deviates from the training responses no more than a distance epsilon, while the curve remains the flattest possible.
+    \item \textbf{Random Forests (RF):} Ensemble method in which several decision trees are trained over a different subset of the training set, using a random set of predictors. The final prediction is built as the average of the individual decision trees results.
+    \item \textbf{Gradient Boosted Trees (GBT):} Ensemble method based on boosting. The goal is to iteratively add new decision trees to the ensemble, improving it. Each training instance has assigned a different weight: those which are more difficult to classify will have a higher weight and the trees added in following iteration will focus more on them.
 \end{itemize}
 
 \subsection{Error metrics}
