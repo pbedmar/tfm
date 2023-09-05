@@ -215,7 +215,8 @@ hmargin=2.7cm
 %\usepackage[style=apa, backend=biber, natbib=true, hyperref=true, uniquelist=false, sortcites]{biblatex}
 %\DeclareLanguageMapping{spanish}{spanish-apa}
 
-\addbibresource{citations/websites.bib} % llama al archivo bibliografia.bib que utilizamos de ejemplo
+\addbibresource{citations/bibliography.bib}
+\addbibresource{citations/websites.bib}
 
 
 %-------------
@@ -384,7 +385,10 @@ hmargin=2.7cm
 
 \clearpage
 \addcontentsline{toc}{chapter}{Bibliography}
-\printbibliography
+
+\printbibliography[nottype=online, title={Bibliography}]
+\printbibliography[type=online, title={Other sources}]
+
 
 
 

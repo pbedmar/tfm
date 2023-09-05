@@ -5,6 +5,7 @@ The length of the time series to be used, the forecasting horizon, the number of
 
 For the hourly and daily levels, the pre-pandemic and post-war markets are being studied.
 
+\newpage
 \section{Hourly analysis}
 In this case the author is working with a 6 months data window. It has been decided to make 168 hours ahead forecasts (1 week). The lags in use try to model the autocorrelation, and are the following: 1, 2, 12, 23, 24, 36, 71, 72, 167 and 168. Apart, other predictors are included to add extra information to the model:
 
@@ -115,7 +116,7 @@ For the daily aggregation analysis 2 years of data are used, producing 30 days a
 \noindent Cross validation is applied again using 15 windows, but in this case the step size is 13.
 
 \subsection{Pre-pandemic scenario}
-The data used for the pre-pandemic scenario experiments ranges from 2018-04-01 to 2020-03-31. The model which performed the best was based on Gradient Boosting Trees (GBT), obtaining 1.044 as MASE, as can be seen in Table \ref{tab:cv-daily-prep}.
+The data used for the pre-pandemic scenario experiments ranges from 2018-04-01 to 2020-03-31. The model which performed the best was based on Gradient Boosting Trees (GBT), obtaining 1.394 as MASE, as can be seen in Table \ref{tab:cv-daily-prep}.
 
 \begin{table}[H]
 \centering
@@ -175,7 +176,7 @@ After training RF with the complete cross-validation data and assessing the perf
     \includegraphics[scale=0.4]{images/analysis/forecast-daily-post}
 \end{figure}
 
-Again, lag 1 is the most influencing lag in Figure \ref{fig:shap-daily-post}. Before, the renewable technology that was influencing the price the most was wind power, but now it changes to hydropower. Coal and combined cycle are still present in the top. TTF daily price also appears in the top, something that wasn't happening before, but its influence is not very clear.
+Again, lag 1 is the most influencing lag in Figure \ref{fig:shap-daily-post}. Now, hydropower generation appears in the top and is not helping to reduce energy price, but making it more expensive. Coal and combined cycle are still present in the top. TTF daily price also appears in the top, something that wasn't happening before, but its influence is not very clear.
 
 \begin{figure}[H]
 \centering
@@ -189,9 +190,9 @@ Again, lag 1 is the most influencing lag in Figure \ref{fig:shap-daily-post}. Be
 
 The best performing models are still those based in decision trees, GBT in the first scenario and RF in the second. As can be seen, again, the forecast in the post-war scenario seems to have more uncertainty.
 
-The conclusions relative to SHAP values are similar for prices before the pandemic and after the war. In both cases, renewable generation technologies contribute to lower the electricity price, while those based in commodities tend to increase it. Newly added predictors such as gas or coal prices seem to not affect the forecast so much.
+The conclusions relative to SHAP values are similar for prices before the pandemic and after the war. In both cases, wind power contributes to lower the electricity price, while technologies based in commodities and hydropower tend to increase it. Newly added predictors such as gas or coal prices seem to not affect the forecast so much.
 
-
+\newpage
 \section{Monthly analysis}
 In the monthly level the author won't compare pre-pandemic with post-war markets as there are no enough datapoints. He will perform the study over the complete series, with data from 2014-01 to 2023-03.
 
@@ -234,7 +235,7 @@ In view of the low forecasting performance, the SHAP values should be taken with
     \label{fig:shap-monthly}
 \end{figure}
 
-
+\newpage
 \section{Yearly analysis}
 
 If data is aggregated by year, there are no enough datapoints to model the series. That's why the author will just perform a descriptive analysis. In Figure \ref{fig:spot-yearly}, the electricity price series is shown: it can be seen how it has remained below 100 euros per megawatt for many years, until 2021.
@@ -305,4 +306,4 @@ This increase is what has specially made the prices go up, as commodity-based te
 
 Observing wind power and solar generation graphs, it can be deducted that they are both technologies in expansion. In the long term, they could contribute to lower the energy price as they don't need fuel to run, just nature forces. Apart, their use will make us less dependent on other countries, making
 
-Looking at these graphs, the author thinks that energy price could return to pre-pandemic levels or similar. This year has seen a price decline, and with the help of renewable energy this price could decrease even more in the following years. Nevertheless, due to inflation, it probably won't be as low as before.
+Looking at these graphs, the author thinks that energy price could return to levels similar to before the pandemic. This year has seen a price decline, and with the help of renewable energy this price could decrease even more in the following years. Nevertheless, due to inflation, it probably won't be as low as before.
