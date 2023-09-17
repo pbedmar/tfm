@@ -17,6 +17,8 @@ During the previous years, many time series libraries have been developed for bo
 
 Between the two languages, the author will stick to Python. It is a general purpose language, being not only used in Data Science but in other fields as Web Development. For this project, in which APIs will be used to retrieve data, this is an advantage. Apart, the existing model explainability libraries are more advanced in Python. Finally, as the author has already worked with time series in R, it is a good opportunity to discover them in a different programming language.
 
+The complete implementation can be found in the GitHub repository of the project \cite{project-repo}.
+
 \subsubsection{Note on scaling and outlier detection}
 In all the steps of the analysis, both when forecasting and computing SHAP values, data is scaled and outliers are detected and interpolated properly. This is because some models in use, specially those based on distances, are sensible to scale, and all the models can be affected by an unusually high or low value in the series.
 
@@ -36,7 +38,7 @@ To simplify this process, the author has created two abstract classes that are i
 
 \textit{DataDownloader} has two main methods implemented by the different materialized classes: they are \textit{downloader()} and \textit{etl()}. The first one is in charge of connecting to an API or URL and downloading the raw information on it. The second one, cleans the data and stores it in a normalized file, see Figure \ref{fig:cleandata-example}: using the same format for all data sources will simplify the manipulation process in \textit{DataProvider}. \textit{etl()} is also the place where missing values are inputted using linear interpolation or date inconsistencies due to summer/winter time changes are fixed.
 
-For now, only ESIOS downloads the data using an API. For the other sources, data is downloaded manually from the browser, as most of them don't have a public API.
+For now, only ESIOS downloads the data using an API, concretely using a wrapper available at \cite{esios-api-wrapper}. For the other sources, data is downloaded manually from the browser, as most of them don't have a public API.
 
 Each stored series has a \textit{ticker} associated. This is a name that uniquely identifies the series and can be used by \textit{DataProvider} to find it. The class has a method named \textit{get\_series()} which, given a ticker, an aggregation level (hourly, daily, monthly...) and start and end dates retrieves the information as a \textit{pandas} series. This information is retrieved from the normalized file mentioned in the previous paragraph.
 
